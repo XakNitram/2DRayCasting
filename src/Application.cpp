@@ -264,7 +264,7 @@ int main(void) {
     /* Output GL Version */
     std::cout << glGetString(GL_VERSION) << std::endl;
 
-    Shader lineShader("res/Shaders/line.vert", "res/Shaders/line.frag");
+    Shader lineShader("Shaders/line.vert", "Shaders/line.frag");
     Line::s_program = &lineShader;
     
     int width, height;
