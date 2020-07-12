@@ -159,109 +159,6 @@ struct Ray {
 };
 
 
-class FanCaster {
-    static const unsigned int numRays = 50;
-    unsigned int vao, vbo;
-public:
-    Vector pos;
-private:
-    std::vector<Ray> rays;
-    std::vector<float> drawData;
-public:
-    static Shader* s_program;
-    
-    FanCaster(float x, float y) : pos({ x, y }), drawData(2 * numRays) {
-        rays.reserve(numRays);
-
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
-        
-        for (unsigned int i = 0; i < numRays; i++) {
-            const float angle = float(i) * (M_TAU / float(numRays));
-
-            rays.emplace_back(x, y, angle);
-
-            drawData[i * 2] = x;
-            drawData[i * 2 + 1] = y;
-        }
-
-        //unsigned int indices[] = { 0, 1, 2, 3, 4, 1 };
-
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, 2 * numRays * sizeof(float), drawData.data(), GL_DYNAMIC_DRAW);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
-    }
-
-    void update(const Vector& newPos) {
-        pos = newPos;
-
-        for (unsigned int i = 0; i < numRays; i++) {
-            const float angle = float(i) * (M_TAU / float(numRays));
-            rays[i].pos = newPos;
-
-            drawData[i * 2] = newPos.x;
-            drawData[i * 2 + 1] = newPos.y;
-        }
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * numRays * sizeof(float), drawData.data());
-    }
-
-    void look(const std::vector<Boundary>& walls) {
-        for (unsigned int i = 0; i < numRays; i++) {
-            const Ray& ray = rays[i];
-
-            std::vector<std::unique_ptr<Vector>> intersections;
-            intersections.reserve(walls.size());
-            for (const Boundary& wall : walls) {
-                auto intersection = ray.cast(wall);
-                if (intersection) {
-                    intersections.push_back(std::move(intersection));
-                }
-            }
-
-            unsigned int numIntersections = intersections.size();
-            if (numIntersections) {
-                std::unique_ptr<Vector> shortestPath = std::move(intersections.back());
-                intersections.pop_back();
-
-                numIntersections--;
-
-                for (unsigned int i = 0; i < numIntersections; i++) {
-                    const auto& intersection = intersections.back();
-
-                    if (ray.pos.distanceTo(*intersection) < ray.pos.distanceTo(*shortestPath)) {
-                        shortestPath = std::move(intersections.back());
-                    }
-                    intersections.pop_back();
-                }
-
-                /*lines[i].updateEnd(*shortestPath);*/
-                const Vector& newVertex = *shortestPath;
-                drawData[i * 2] = newVertex.x;
-                drawData[i * 2 + 1] = newVertex.y;
-            }
-        }
-
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * numRays * sizeof(float), drawData.data());
-    }
-
-    void show() {
-        glBindVertexArray(vao);
-        s_program->bind();
-        glDrawArrays(GL_TRIANGLE_FAN, 0, numRays);
-    }
-};
-
-Shader* FanCaster::s_program = nullptr;
-
-
 class LineCaster {
     static const unsigned int numRays = 50;
 public:
@@ -369,7 +266,6 @@ int main(void) {
 
     Shader lineShader("res/Shaders/line.vert", "res/Shaders/line.frag");
     Line::s_program = &lineShader;
-    FanCaster::s_program = &lineShader;
     
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -405,7 +301,6 @@ int main(void) {
     
     // Particle to follow the mouse
     LineCaster entity(float(width) / 2.0f, float(height) / 2.0f);
-    //FanCaster entity(float(width) / 2.0f, float(height) / 2.0f);
 
     double oldMouseX = 0.0;
     double oldMouseY = 0.0;
