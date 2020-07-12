@@ -6,6 +6,8 @@
 #include "GLFW/glfw3.h"
 #include "Shader.h"
 
+// Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
+
 constexpr float M_PI = 3.14159265358979323846f;
 constexpr float M_PI_30 = M_PI / 30.0f;
 constexpr float M_TAU = M_PI * 2.0f;
