@@ -162,7 +162,7 @@ struct Ray {
 
 
 class LineCaster {
-    static const unsigned int numRays = 50;
+    static const unsigned int numRays = 90;
 public:
     Vector pos;
 private:
