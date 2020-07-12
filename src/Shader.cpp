@@ -73,7 +73,7 @@ unsigned int Shader::compileShader(const int mode, const std::string& source) {
 }
 
 Location Shader::uniformLocation(const std::string& name) const {
-	if (!m_id > 0) throw std::exception("Invalid program");
+	if (!(m_id > 0)) throw std::exception("Invalid program");
 	const int location = glGetUniformLocation(m_id, name.c_str());
 	return { location };
 }
