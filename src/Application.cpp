@@ -5,6 +5,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
+#include "Vector.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
@@ -12,33 +13,9 @@ constexpr float M_PI = 3.14159265358979323846f;
 constexpr float M_PI_30 = M_PI / 30.0f;
 constexpr float M_TAU = M_PI * 2.0f;
 
-struct Vector {
-    float x, y;
-
-	Vector(): x(0.0f), y(0.0f) {}
-	Vector(const float x, const float y): x(x), y(y) {}
-    Vector(const Vector& other): x(other.x), y(other.y) {}
-
-	float angle() const {
-        return std::atan2f(y, x);
-	}
-
-	float angleTo(Vector& other) const {
-        return std::atan2f(other.y - y, other.x - x);
-	}
-
-    float distanceTo(Vector& other) const {
-        const float dx = other.x - x;
-        const float dy = other.y - y;
-        return dx * dx + dy * dy;
-    }
-};
-
 
 class Line {
 public:
-    static Shader* s_program;
-
     unsigned int vao, vbo;
 private:
     void setData(float x1, float y1, float x2, float y2) {
@@ -102,12 +79,9 @@ public:
 
     void draw() const {
         glBindVertexArray(vao);
-        s_program->bind();
         glDrawArrays(GL_LINES, 0, 2);
     }
 };
-
-Shader* Line::s_program = nullptr;
 
 
 struct Boundary {
@@ -267,7 +241,6 @@ int main(void) {
     std::cout << glGetString(GL_VERSION) << std::endl;
 
     Shader lineShader("Shaders/line.vert", "Shaders/line.frag");
-    Line::s_program = &lineShader;
     
     int width, height;
     glfwGetFramebufferSize(window, &width, &height);
@@ -307,6 +280,7 @@ int main(void) {
     double oldMouseX = 0.0;
     double oldMouseY = 0.0;
 
+    lineShader.bind();
     /* Loop until the user closes the window */
     while (!glfwWindowShouldClose(window)) {
         double mousePosX, mousePosY;
