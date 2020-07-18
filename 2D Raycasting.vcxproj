@@ -158,10 +158,13 @@ copy "$(SolutionDir)\res\Shaders\" "$(TargetDir)\Shaders\"</Command>
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Vector.cpp" />
+    <ClCompile Include="src\VertexArray.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GLUtils.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Vector.h" />
+    <ClInclude Include="src\VertexArray.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="res\Shaders\line.frag" />

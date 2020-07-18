@@ -5,6 +5,7 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
+#include "VertexArray.h"
 #include "Vector.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
@@ -14,59 +15,52 @@ constexpr double M_TAU = M_PI * 2.0;
 
 
 class Line {
-public:
-    unsigned int vao, vbo;
-private:
+    VertexArray vao;
+
     inline void setup(double x1, double y1, double x2, double y2, GLenum usage) {
-        glGenVertexArrays(1, &vao);
-        glBindVertexArray(vao);
+        float positions[4] = {
+            float(x1), float(y1),
+            float(x2), float(y2)
+        };
 
-        float positions[] = { float(x1), float(y1), float(x2), float(y2) };
-        
-        glGenBuffers(1, &vbo);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, sizeof(positions), positions, usage);
-
-        glEnableVertexAttribArray(0);
-        glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 2 * sizeof(GLfloat), nullptr);
+        vao.constructBuffer(4 * sizeof(float), positions, usage);
+        vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
     }
     
 public:
     Line(const Vector& start, const Vector& end) { setup(start.x, start.y, end.x, end.y, GL_STATIC_DRAW); }
     Line(const Vector& start, const Vector& end, GLenum usage) { setup(start.x, start.y, end.x, end.y, usage); }
 
-    ~Line() {
-        glDeleteVertexArrays(1, &vao);
-        glDeleteBuffers(1, &vbo);
-    }
+    Line(const Line& other) {}
+    Line(Line&& other) noexcept : vao(std::move(other.vao)) {}
 
     void update(const Vector& start, const Vector& end) {
-        float newPositions[] = { float(start.x), float(start.y), float(end.x), float(end.y) };
+        float positions[4] = {
+            float(start.x), float(start.y),
+            float(end.x), float(end.y)
+        };
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(newPositions), newPositions);
+        vao.setData(0, sizeof(positions), positions);
     }
 
     void updateStart(const Vector& start) {
-        float newStart[] = { float(start.x), float(start.y) };
+        float positions[2] = {
+            float(start.x), float(start.y)
+        };
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 0, 2 * sizeof(float), newStart);
+        vao.setData(0, sizeof(positions), positions);
     }
 
     void updateEnd(const Vector& end) {
-        float newEnd[] = { float(end.x), float(end.y) };
+        float positions[2] = {
+            float(end.x), float(end.y)
+        };
 
-        glBindVertexArray(vao);
-        glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferSubData(GL_ARRAY_BUFFER, 2 * sizeof(float), 2 * sizeof(float), newEnd);
+        vao.setData(2 * sizeof(float), sizeof(positions), positions);
     }
 
     void draw() const {
-        glBindVertexArray(vao);
-        glDrawArrays(GL_LINES, 0, 2);
+        vao.draw(GL_LINES, 2);
     }
 };
 
@@ -89,7 +83,8 @@ struct Ray {
 
     Ray(double x, double y, double angle) : pos({ x, y }), dir({ std::cos(angle), std::sin(angle) }) {}
 
-    //Ray(const Ray& other) = delete;
+    // Can't delete the copy and move constructors because std::vector references them _just in case_
+    // Ray(const Ray& other) = delete;
     Ray(const Ray& other) : pos({ other.pos.x, other.pos.y }), dir({ other.dir.x, other.dir.y }) {
         std::cout << "Copied a ray" << std::endl;
     }
@@ -211,6 +206,8 @@ int main(void) {
     if (!glfwInit())
         return -1;
 
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
+
     /* Create a windowed mode window and its OpenGL context */
     window = glfwCreateWindow(400, 400, "Raycasting", NULL, NULL);
     if (!window)
@@ -249,20 +246,46 @@ int main(void) {
 
     /* ****** Main code below ****** */
     std::vector<Boundary> bounds;
-    bounds.reserve(8);
+    bounds.reserve(14);
+
+    // Later on we will allow reading these from a file
+    double widthDbl = double(width);
+    double heightDbl = double(height);
+
+    double aspect = widthDbl / heightDbl;
+    double widthPad = (10.0 * widthDbl) / (400.0 * aspect);
+    double heightPad = (10.0 * heightDbl) / (400.0 / aspect);
+
+    double width14 = widthDbl / 4.0;
+    double height14 = heightDbl / 4.0;
+
+    double width34 = 3.0 * width14;
+    double height34 = 3.0 * height14;
 
     // Exterior Bounds
-    bounds.emplace_back(10.0, 10.0, 390.0, 10.0);
-    bounds.emplace_back(390.0, 10.0, 390.0, 390.0);
-    bounds.emplace_back(390.0, 390.0, 10.0, 390.0);
-    bounds.emplace_back(10.0, 390.0, 10.0, 10.0);
+    bounds.emplace_back(widthPad, heightPad, widthDbl - widthPad, heightPad);
+    bounds.emplace_back(widthDbl - widthPad, heightPad, widthDbl - widthPad, heightDbl - heightPad);
+    bounds.emplace_back(widthDbl - widthPad, heightDbl - heightPad, widthPad, heightDbl - heightPad);
+    bounds.emplace_back(widthPad, heightDbl - heightPad, widthPad, heightPad);
 
-    // Interior Bounds
-    bounds.emplace_back(100.0, 100.0, 100.0, 300.0);
-    bounds.emplace_back(300.0, 100.0, 300.0, 300.0);
-    
-    bounds.emplace_back(150.0, 150.0, 250.0, 250.0);
-    bounds.emplace_back(250.0, 150.0, 150.0, 250.0);
+    // ****** Interior Bounds ****** //
+    // **** Left Block **** //
+    bounds.emplace_back(width14 - widthPad, height14 - heightPad, width14 + widthPad, height14 - heightPad);
+    bounds.emplace_back(width14 + widthPad, height14 - heightPad, width14 + widthPad, height34 + heightPad);
+    bounds.emplace_back(width14 + widthPad, height34 + heightPad, width14 - widthPad, height34 + heightPad);
+    bounds.emplace_back(width14 - widthPad, height34 + heightPad, width14 - widthPad, height14 - heightPad);
+
+    // **** Right Block **** //
+    bounds.emplace_back(width34 - widthPad, height14 - heightPad, width34 + widthPad, height14 - heightPad);
+    bounds.emplace_back(width34 + widthPad, height14 - heightPad, width34 + widthPad, height34 + heightPad);
+    bounds.emplace_back(width34 + widthPad, height34 + heightPad, width34 - widthPad, height34 + heightPad);
+    bounds.emplace_back(width34 - widthPad, height34 + heightPad, width34 - widthPad, height14 - heightPad);
+
+    float widthPad5 = 5.0 * widthPad;
+    float heightPad5 = 5.0 * heightPad;
+
+    bounds.emplace_back(width14 + widthPad5, height14 + heightPad5, width34 - widthPad5, height34 - heightPad5);
+    bounds.emplace_back(width34 - widthPad5, height14 + heightPad5, width14 + widthPad5, height34 - heightPad5);
     
     // Particle to follow the mouse
     LineCaster entity(double(width) / 2.0, double(height) / 2.0);
@@ -276,10 +299,10 @@ int main(void) {
         double mousePosX, mousePosY;
         glfwGetCursorPos(window, &mousePosX, &mousePosY);
 
-        mousePosY = width - mousePosY;
+        mousePosY = heightDbl - mousePosY;
         
         if (!(mousePosX == oldMouseX && mousePosY == oldMouseY)) {
-            if (!(mousePosX < 10.0 || mousePosX > 390.0 || mousePosY < 10.0 || mousePosY > 390.0)) {
+            if (!(mousePosX < widthPad || mousePosX > widthDbl - widthPad || mousePosY < heightPad || mousePosY > heightDbl - heightPad)) {
                 entity.update({ mousePosX, mousePosY });
                 entity.look(bounds);
             }
