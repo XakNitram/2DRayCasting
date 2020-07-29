@@ -1,14 +1,14 @@
 #include "Vector.h"
 
-Vector::Vector() : x(0.0), y(0.0) {}
+Vector::Vector() : x(0.0f), y(0.0f) {}
 
-Vector::Vector(double x, double y) : x(x), y(y) {}
+Vector::Vector(float x, float y) : x(x), y(y) {}
 
 Vector::Vector(const Vector& other) : x(other.x), y(other.y) {}
 
-double Vector::distanceTo(const Vector& other) const {
-	const double dx = other.x - x;
-	const double dy = other.y - y;
+float Vector::distanceTo(const Vector& other) const {
+	const float dx = other.x - x;
+	const float dy = other.y - y;
 
 	return dx * dx + dy * dy;
 }

@@ -1,12 +1,12 @@
 #pragma once
 
 struct Vector {
-	double x, y;
+	float x, y;
 
 	Vector();
-	Vector(double x, double y);
+	Vector(float x, float y);
 	Vector(const Vector& other);
 
-	double distanceTo(const Vector& other) const;
+	float distanceTo(const Vector& other) const;
 };
 
