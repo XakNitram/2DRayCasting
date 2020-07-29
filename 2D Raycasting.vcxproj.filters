@@ -18,20 +18,20 @@
     <ClCompile Include="src\Application.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Shader.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="src\Vector.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\Shader.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Shader.h">
-      <Filter>Header Files</Filter>
-    </ClInclude>
     <ClInclude Include="src\Vector.h">
       <Filter>Header Files</Filter>
     </ClInclude>
@@ -41,14 +41,23 @@
     <ClInclude Include="src\GLUtils.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="src\Shader.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Shaders\line.frag">
+    <None Include="res\Shaders\redline.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\Shaders\line.vert">
+    <None Include="res\Shaders\default.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\Shaders\redline.frag" />
+    <None Include="res\Shaders\default.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\spacetime.frag" />
   </ItemGroup>
 </Project>
