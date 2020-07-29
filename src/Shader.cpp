@@ -1,8 +1,6 @@
-#include <fstream>
-#include <sstream>
 #include <iostream>
-#include <exception>
 #include <GL/glew.h>
+#include "GLUtils.h"
 #include "Shader.h"
 
 
@@ -14,48 +12,39 @@ Location::Location(Location& other): data(other.data) {
 	std::cout << "Copied location" << std::endl;
 }
 
-std::string read_file(const std::string& filepath) {
-	std::ifstream file(filepath);
-	std::stringstream output_stream;
+Shader::Shader(): m_id(0) {}
+Shader::Shader(const std::string& vertexSource, const std::string& fragmentSource): m_id(0) {
+	GLClearErrors();
+	m_id = glCreateProgram();
+	ASSERT(GLLogCall("glCreateProgram", __FILE__, __LINE__));
 
-	std::string line;
-	while (getline(file, line)) {
-		output_stream << line << '\n';
-	}
+	GLClearErrors();
+	const unsigned int vs = compileShader(GL_VERTEX_SHADER, vertexSource);
+	const unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragmentSource);
+	ASSERT(GLLogCall("compileShaders", __FILE__, __LINE__));
 
-	return output_stream.str();
+	GLCall(glAttachShader(m_id, vs));
+	GLCall(glAttachShader(m_id, fs));
+
+	GLCall(glLinkProgram(m_id));
+	GLCall(glValidateProgram(m_id));
+
+	GLCall(glDeleteShader(vs));
+	GLCall(glDeleteShader(fs));
 }
 
-Shader::Shader(): m_id(0) {}
-Shader::Shader(const std::string& vertexFile, const std::string& fragmentFile): m_id(0) {
-	m_id = glCreateProgram();
-
-	const std::string vertex_source = read_file(vertexFile);
-	const std::string fragment_source = read_file(fragmentFile);
-
-	const unsigned int vs = compileShader(GL_VERTEX_SHADER, vertex_source);
-	const unsigned int fs = compileShader(GL_FRAGMENT_SHADER, fragment_source);
-
-	//GLCall(glAttachShader(m_id, vs));
-	glAttachShader(m_id, vs);
-	//GLCall(glAttachShader(m_id, fs));
-	glAttachShader(m_id, fs);
-
-	//GLCall(glLinkProgram(m_id));
-	glLinkProgram(m_id);
-	//GLCall(glValidateProgram(m_id));
-	glValidateProgram(m_id);
-
-	//GLCall(glDeleteShader(vs));
-	glDeleteShader(vs);
-	//GLCall(glDeleteShader(fs));
-	glDeleteShader(fs);
+Shader::~Shader() {
+	GLCall(glDeleteProgram(m_id));
 }
 
 unsigned int Shader::compileShader(const int mode, const std::string& source) {
+	GLClearErrors();
 	const unsigned int id = glCreateShader(mode);
+	ASSERT(GLLogCall("glCreateShader", __FILE__, __LINE__));
 	const char* src = source.c_str();
-	glShaderSource(id, 1, &src, nullptr);
+	GLCall(glShaderSource(id, 1, &src, nullptr));
+	
+	GLClearErrors();
 	glCompileShader(id);
 
 	int result;
@@ -68,6 +57,7 @@ unsigned int Shader::compileShader(const int mode, const std::string& source) {
 		std::cout << "Failed to compile " << (mode == GL_VERTEX_SHADER ? "vertex" : "fragment") << " shader" << std::endl;
 		std::cout << message << std::endl;
 	}
+	GLLogErrors();
 
 	return id;
 }
@@ -78,12 +68,59 @@ Location Shader::uniformLocation(const std::string& name) const {
 	return { location };
 }
 
-// ReSharper disable once CppMemberFunctionMayBeConst
 void Shader::uniformMatrix4fv(const Location& location, const float* data) {
-	glUseProgram(m_id);
-	glUniformMatrix4fv(location, 1, GL_FALSE, data);
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, data));
+}
+
+void Shader::uniform1f(const Location& location, const float v0) {
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniform1f(location, v0));
+}
+
+void Shader::uniform2f(const Location& location, const float v0, const float v1) {
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniform2f(location, v0, v1));
+}
+
+void Shader::uniform1i(const Location& location, const int v0) {
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniform1i(location, v0));
+}
+
+void Shader::setOrthographic(const Location& location, float top, float bottom, float right, float left, float far, float near) {
+	GLCall(glUseProgram(m_id));
+
+	float ortho[16] = {
+		// top 3 rows
+		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+		0.0f, 0.0f, 2.0f / (far - near), 0.0f,
+		
+		// bottom row
+		-(right + left) / (right - left), 
+		-(top + bottom) / (top - bottom), 
+		-(far + near) / (far - near), 
+		1.0f
+	};
+
+	GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, ortho));
+}
+
+void Shader::setOrthographic2D(const Location& location, float top, float bottom, float right, float left) {
+	GLCall(glUseProgram(m_id));
+
+	float ortho[16] = {
+		// top 3 rows
+		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
+		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+		0.0f, 0.0f, 1.0f, 0.0f,
+		-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0.0f, 1.0f
+	};
+
+	GLCall(glUniformMatrix4fv(location, 1, GL_FALSE, ortho));
 }
 
 void Shader::bind() const {
-	glUseProgram(m_id);
+	GLCall(glUseProgram(m_id));
 }

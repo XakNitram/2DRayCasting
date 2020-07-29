@@ -1,8 +1,8 @@
 #pragma once
 #include <iostream>
+#include "Utils.h"
 #include "GL/glew.h"
 
-#define ASSERT(x) if (!(x)) __debugbreak();
 #define GLCall(x) GLClearErrors();\
     x;\
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))
@@ -14,10 +14,22 @@ static void GLClearErrors() {
 
 
 static bool GLLogCall(const char* function, const char* file, int line) {
+    bool exitOK = true;
     while (GLenum error = glGetError()) {
         std::cout << "[OpenGL Error] (" << error << ')' << function <<
             " " << file << ':' << line << std::endl;
-        return false;
+        exitOK = false;
     }
-    return true;
+    
+    return exitOK;
+}
+
+static bool GLLogErrors() {
+    bool exitOK = true;
+    while (GLenum error = glGetError()) {
+        std::cout << "[OpenGL Error] (" << std::hex << error << ')' << std::endl;
+        exitOK = false;
+    }
+
+    return exitOK;
 }

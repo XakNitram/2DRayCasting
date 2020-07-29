@@ -17,13 +17,23 @@ class Shader {
 public:
 	Shader();
 	Shader(const std::string& vertexFile, const std::string& fragmentFile);
-	Shader(const Shader& other);
+	~Shader();
 
 	static unsigned int compileShader(int mode, const std::string& source);
 
 	[[nodiscard]] Location uniformLocation(const std::string& name) const;
 
 	void uniformMatrix4fv(const Location& location, const float* data);
+
+	void uniform1f(const Location& location, const float v0);
+
+	void uniform2f(const Location& location, const float v0, const float v1);
+
+	void uniform1i(const Location& location, const int v0);
+
+	void setOrthographic(const Location& location, float top, float bottom, float right, float left, float far, float near);
+	
+	void setOrthographic2D(const Location& location, float top, float bottom, float right, float left);
 
 	void bind() const;
 };
