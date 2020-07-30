@@ -12,11 +12,9 @@ class VertexArray {
 	unsigned int id, vbo, ebo;
 	unsigned int attributeCount;
 
-	void setup();
 	void genIndexBuffer();
 
 public:
-	VertexArray();
 	VertexArray(bool useElementsBuffer);
 	VertexArray(VertexArray&& other) noexcept;
 	~VertexArray();

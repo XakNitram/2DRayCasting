@@ -1,13 +1,5 @@
 #include "VertexArray.h"
 
-
-void VertexArray::setup() {
-	GLCall(glGenVertexArrays(1, &id));
-	GLCall(glBindVertexArray(id));
-	GLCall(glGenBuffers(1, &vbo));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-}
-
 void VertexArray::genIndexBuffer() {
 #ifdef _DEBUG
 	std::cout << "Initializing element buffer on vertex array " << id << " post-initialization." << std::endl;
@@ -18,16 +10,15 @@ void VertexArray::genIndexBuffer() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }
 
-VertexArray::VertexArray(): ebo(0), attributeCount(0) {
-	setup();
-}
-
-VertexArray::VertexArray(bool useElementsBuffer): ebo(0), attributeCount(0) {
-	setup();
+VertexArray::VertexArray(bool useElementsBuffer = false): ebo(0), attributeCount(0) {
+	GLCall(glGenVertexArrays(1, &id));
+	GLCall(glBindVertexArray(id));
+	GLCall(glGenBuffers(1, &vbo));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	
 	if (useElementsBuffer) {
 		GLCall(glGenBuffers(1, &ebo));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
 	}
 }
 
@@ -51,7 +42,7 @@ VertexArray::~VertexArray() {
 		GLCall(glDeleteVertexArrays(1, &id));
 
 #ifdef _DEBUG
-		std::cout << "Destroying vertex array (" << id << ") and associated buffers." << std::endl;
+		std::cout << "Destroying vertex array " << id << " and associated buffers." << std::endl;
 #endif // DEBUG
 	}
 
