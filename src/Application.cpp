@@ -5,9 +5,8 @@
 #include "GL/glew.h"
 #include "GLFW/glfw3.h"
 #include "Shader.h"
-#include "VertexArray.h"
-#include "Vector.h"
 #include "Utils.h"
+#include "Boundary.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
@@ -89,24 +88,40 @@ public:
 	void run() {
 		std::string vertexSource = readFile("Shaders/default.vert");
 		std::string fragmentSource = readFile("Shaders/default.frag");
-        Shader boundShader(vertexSource, fragmentSource);
+        Shader boundaryShader(vertexSource, fragmentSource);
 
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 
 		std::string projectionUniformName = "u_Projection";
-		Location u_projection = boundShader.uniformLocation(projectionUniformName);
+		Location u_projection = boundaryShader.uniformLocation(projectionUniformName);
 
 		float widthf = float(width);
 		float heightf = float(height);
 
 		if (u_projection) {
-			boundShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f);
+			boundaryShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f);
 		}
 
+		std::vector<Boundary> bounds;
+		bounds.reserve(5);
+
+		bounds.emplace_back(50.0f, heightf / 2.0f + 100.0f, width - 50.0f, heightf / 2.0f + 100.0f);
+		bounds.emplace_back(50.0f, heightf / 2.0f + 50.0f, width - 50.0f, heightf / 2.0f + 50.0f);
+		bounds.emplace_back(50.0f, heightf / 2.0f, width - 50.0f, heightf / 2.0f);
+		bounds.emplace_back(50.0f, heightf / 2.0f - 50.0f, width - 50.0f, heightf / 2.0f - 50.0f);
+		bounds.emplace_back(50.0f, heightf / 2.0f - 100.0f, width - 50.0f, heightf / 2.0f - 100.0f);
+
+		boundaryShader.bind();
 		while (!glfwWindowShouldClose(window)) {
-			/* Update shaders and render. */
+			/****** Update shaders and render. ******/
+			// Clear the screen.
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			// Draw boundaries.
+			for (const Boundary& bound : bounds) {
+				bound.draw();
+			}
 			
 			/* Swap front and back buffers. */
 			glfwSwapBuffers(window);
