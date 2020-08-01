@@ -167,6 +167,7 @@ copy "$(SolutionDir)\res\Shaders\" "$(TargetDir)\Shaders\"</Command>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\AngleCaster.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Boundary.cpp" />
     <ClCompile Include="src\Geometrics.cpp" />
@@ -175,9 +176,11 @@ copy "$(SolutionDir)\res\Shaders\" "$(TargetDir)\Shaders\"</Command>
     <ClCompile Include="src\VertexArray.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\AngleCaster.h" />
     <ClInclude Include="src\Boundary.h" />
-    <ClInclude Include="src\GLUtils.h" />
+    <ClInclude Include="src\Caster.h" />
     <ClInclude Include="src\Geometrics.h" />
+    <ClInclude Include="src\GLUtils.h" />
     <ClInclude Include="src\Shader.h" />
     <ClInclude Include="src\Utils.h" />
     <ClInclude Include="src\VertexArray.h" />

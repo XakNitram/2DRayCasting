@@ -33,6 +33,9 @@
     <ClCompile Include="src\VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AngleCaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\GLUtils.h">
@@ -47,10 +50,16 @@
     <ClInclude Include="src\Boundary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Geometrics.h">
+    <ClInclude Include="src\VertexArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\VertexArray.h">
+    <ClInclude Include="src\Caster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AngleCaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Geometrics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
