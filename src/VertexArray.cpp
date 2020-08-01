@@ -63,7 +63,7 @@ void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum us
 
 void VertexArray::setArrayData(GLintptr offset, GLsizeiptr size, const void* data) {
 #ifdef _DEBUG
-	std::cout << "Updating array buffer with" << size << "bytes of data." << std::endl;
+	std::cout << "Updating array buffer with " << size << " bytes of data." << std::endl;
 #endif // _DEBUG
 
 	GLCall(glBindVertexArray(id));
