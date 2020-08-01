@@ -7,6 +7,7 @@
 #include "Shader.h"
 #include "Utils.h"
 #include "Boundary.h"
+#include "AngleCaster.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
@@ -70,6 +71,9 @@ public:
 		/* Make the window's context current. */
 		glfwMakeContextCurrent(window);
 
+		/* Enable VSync */
+		glfwSwapInterval(1);
+
 		/* Initialize GLEW. */
 		if (glewInit() != GLEW_OK) {
 			this->~Simulation();
@@ -93,8 +97,7 @@ public:
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 
-		std::string projectionUniformName = "u_Projection";
-		Location u_projection = boundaryShader.uniformLocation(projectionUniformName);
+		Location u_projection = boundaryShader.uniformLocation("u_Projection");
 
 		float widthf = float(width);
 		float heightf = float(height);
@@ -103,20 +106,73 @@ public:
 			boundaryShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f);
 		}
 
-		std::vector<Boundary> bounds;
-		bounds.reserve(5);
+		Location u_resolution = boundaryShader.uniformLocation("u_Resolution");
+		if (u_resolution) {
+			boundaryShader.uniform2f(u_resolution, widthf, heightf);
+		}
 
-		bounds.emplace_back(50.0f, heightf / 2.0f + 100.0f, width - 50.0f, heightf / 2.0f + 100.0f);
-		bounds.emplace_back(50.0f, heightf / 2.0f + 50.0f, width - 50.0f, heightf / 2.0f + 50.0f);
-		bounds.emplace_back(50.0f, heightf / 2.0f, width - 50.0f, heightf / 2.0f);
-		bounds.emplace_back(50.0f, heightf / 2.0f - 50.0f, width - 50.0f, heightf / 2.0f - 50.0f);
-		bounds.emplace_back(50.0f, heightf / 2.0f - 100.0f, width - 50.0f, heightf / 2.0f - 100.0f);
+		Location u_time = boundaryShader.uniformLocation("u_Time");
+		double startTime = glfwGetTime();
+		auto setShaderTime = [&, startTime](double time) {
+			if (u_time) {
+				boundaryShader.uniform1f(u_time, float(startTime - time));
+			}
+		};
+		
+		setShaderTime(glfwGetTime());
+
+		std::vector<Boundary> bounds;
+		bounds.reserve(16); {
+			const float wPad = 10.0f * widthf / 400.0f;
+			const float hPad = 10.0f * heightf / 400.0f;
+
+			bounds.emplace_back(wPad, hPad, widthf - wPad, hPad);
+			bounds.emplace_back(widthf - wPad, hPad, widthf - wPad, heightf - hPad);
+			bounds.emplace_back(widthf - wPad, heightf - hPad, wPad, heightf - hPad);
+			bounds.emplace_back(wPad, heightf - hPad, wPad, hPad);
+
+			const float width14 = widthf / 4.0f;
+			const float height14 = heightf / 4.0f;
+			const float width34 = 3.0f * widthf / 4.0f;
+			const float height34 = 3.0f * heightf / 4.0f;
+
+			bounds.emplace_back(width14 - wPad, height14 - hPad, width14 + wPad, height14 - hPad);
+			bounds.emplace_back(width14 + wPad, height14 - hPad, width14 + wPad, height34 + hPad);
+			bounds.emplace_back(width14 + wPad, height34 + hPad, width14 - wPad, height34 + hPad);
+			bounds.emplace_back(width14 - wPad, height34 + hPad, width14 - wPad, height14 - hPad);
+
+			bounds.emplace_back(width34 - wPad, height14 - hPad, width34 + wPad, height14 - hPad);
+			bounds.emplace_back(width34 + wPad, height14 - hPad, width34 + wPad, height34 + hPad);
+			bounds.emplace_back(width34 + wPad, height34 + hPad, width34 - wPad, height34 + hPad);
+			bounds.emplace_back(width34 - wPad, height34 + hPad, width34 - wPad, height14 - hPad);
+
+			const float wPad5 = 5.0f * wPad;
+			const float hPad5 = 5.0f + hPad;
+
+			bounds.emplace_back(width14 + wPad5, height14, widthf / 2.0f, heightf / 2.0f);
+			bounds.emplace_back(width34 - wPad5, height14, widthf / 2.0f, heightf / 2.0f);
+			bounds.emplace_back(width14 + wPad5, height34, widthf / 2.0f, heightf / 2.0f);
+			bounds.emplace_back(width34 - wPad5, height34, widthf / 2.0f, heightf / 2.0f);
+		}
+
+		AngleCaster entity(widthf / 2.0f, heightf / 2.0f);
 
 		boundaryShader.bind();
 		while (!glfwWindowShouldClose(window)) {
+			double mousePosX, mousePosY;
+			glfwGetCursorPos(window, &mousePosX, &mousePosY);
+			
+			entity.update(float(mousePosX), heightf - float(mousePosY));
+			entity.look(bounds);
+
+			setShaderTime(glfwGetTime());
+
 			/****** Update shaders and render. ******/
 			// Clear the screen.
 			glClear(GL_COLOR_BUFFER_BIT);
+
+			// Draw caster.
+			entity.draw();
 
 			// Draw boundaries.
 			for (const Boundary& bound : bounds) {
