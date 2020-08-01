@@ -34,7 +34,7 @@ Ray::Ray(float x, float y, float angle) : pos(x, y), dir(std::cosf(angle), std::
 
 Ray::Ray() : pos(0.0f, 0.0f), dir(1.0f, 0.0f) {}
 
-std::unique_ptr<Vector> Ray::intersects(const LineSegment& segment) const {
+std::unique_ptr<Point> Ray::intersects(const LineSegment& segment) const {
     const float x1 = segment.a.x;
     const float y1 = segment.a.y;
     const float x2 = segment.b.x;
@@ -44,20 +44,19 @@ std::unique_ptr<Vector> Ray::intersects(const LineSegment& segment) const {
     const float y3 = pos.y;
     const float x4 = x3 + dir.x;
     const float y4 = y3 + dir.y;
-
+   
     const float den = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
-    if (den == 0.0) { return nullptr; }
+    if (den == 0.0f) {
+        return nullptr;
+    }
 
     const float t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / den;
     const float u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / den;
 
     if ((t >= 0.0f && t <= 1.0f) && u >= 0.0f) {
-        return std::make_unique<Vector>(
-            x1 + t * (x2 - x1),
-            y1 + t * (y2 - y1)
-            );
+        return std::make_unique<Point>(x1 + t * (x2 - x1), y1 + t * (y2 - y1));
     }
-
+    
     else {
         return nullptr;
     }

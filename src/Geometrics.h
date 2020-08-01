@@ -34,5 +34,5 @@ struct Ray {
 	Ray(float x, float y, float angle);
 	Ray();
 
-	std::unique_ptr<Vector> intersects(const LineSegment& bound) const;
+	std::unique_ptr<Point> intersects(const LineSegment& bound) const;
 };
