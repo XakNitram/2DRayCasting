@@ -21,34 +21,58 @@
     <ClCompile Include="src\Shader.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="src\Vector.cpp">
+    <ClCompile Include="src\Utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Boundary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="src\Geometrics.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="src\VertexArray.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="src\AngleCaster.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="src\GLUtils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
     <ClInclude Include="src\Shader.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\Vector.h">
+    <ClInclude Include="src\Utils.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Boundary.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="src\VertexArray.h">
       <Filter>Header Files</Filter>
     </ClInclude>
-    <ClInclude Include="src\GLUtils.h">
+    <ClInclude Include="src\Caster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\AngleCaster.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="src\Geometrics.h">
       <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="res\Shaders\line.frag">
+    <None Include="res\Shaders\redline.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\Shaders\line.vert">
+    <None Include="res\Shaders\default.frag">
       <Filter>Resource Files</Filter>
     </None>
-    <None Include="res\Shaders\redline.frag" />
+    <None Include="res\Shaders\default.vert">
+      <Filter>Resource Files</Filter>
+    </None>
+    <None Include="res\Shaders\spacetime.frag" />
   </ItemGroup>
 </Project>
