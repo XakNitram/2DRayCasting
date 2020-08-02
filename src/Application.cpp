@@ -122,6 +122,9 @@ public:
 		std::string vertexSource = readFile("Shaders/default.vert");
 		std::string fragmentSource = readFile("Shaders/default.frag");
         Shader boundaryShader(vertexSource, fragmentSource);
+
+		//fragmentSource = readFile("Shaders/spacetime.frag");
+		std::cout << fragmentSource << std::endl;
 		Shader lightShader(vertexSource, fragmentSource);
 
 		int width, height;
@@ -144,7 +147,7 @@ public:
 		auto setShaderTime = [&](double time) {
 			lightShader.iUniform1f(u_time, float(startTime - time));
 		};
-		
+
 		setShaderTime(glfwGetTime());
 
 		const float wPad = (10.0f * widthf) / 400.0f;
