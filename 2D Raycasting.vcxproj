@@ -170,6 +170,8 @@ copy "$(SolutionDir)\res\Shaders\" "$(TargetDir)\Shaders\"</Command>
     <ClCompile Include="src\AngleCaster.cpp" />
     <ClCompile Include="src\Application.cpp" />
     <ClCompile Include="src\Boundary.cpp" />
+    <ClCompile Include="src\Caster.cpp" />
+    <ClCompile Include="src\EndPointCaster.cpp" />
     <ClCompile Include="src\Geometrics.cpp" />
     <ClCompile Include="src\Shader.cpp" />
     <ClCompile Include="src\Utils.cpp" />
@@ -179,6 +181,7 @@ copy "$(SolutionDir)\res\Shaders\" "$(TargetDir)\Shaders\"</Command>
     <ClInclude Include="src\AngleCaster.h" />
     <ClInclude Include="src\Boundary.h" />
     <ClInclude Include="src\Caster.h" />
+    <ClInclude Include="src\EndPointCaster.h" />
     <ClInclude Include="src\Geometrics.h" />
     <ClInclude Include="src\GLUtils.h" />
     <ClInclude Include="src\Shader.h" />
