@@ -48,7 +48,7 @@ VertexArray::~VertexArray() {
 
 #ifdef _DEBUG
 	else {
-		std::cout << "Vertex array lifetime ended with an id of 0." << std::endl;
+		std::cout << "Vertex array " << id << " lifetime ended with an id of 0." << std::endl;
 	}
 #endif // DEBUG
 }
@@ -62,9 +62,9 @@ void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum us
 }
 
 void VertexArray::setArrayData(GLintptr offset, GLsizeiptr size, const void* data) {
-#ifdef _DEBUG
-	std::cout << "Updating array buffer with " << size << " bytes of data." << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	std::cout << "Updating array buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
+//#endif // _DEBUG
 
 	GLCall(glBindVertexArray(id));
 	GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
@@ -86,9 +86,9 @@ void VertexArray::constructIndexBuffer(GLsizei size, const void* data, GLenum us
 }
 
 void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* data) {
-#ifdef _DEBUG
-	std::cout << "Updating element buffer with " << size << " bytes of data." << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	std::cout << "Updating element buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
+//#endif // _DEBUG
 	GLCall(glBindVertexArray(id));
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
