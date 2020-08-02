@@ -93,38 +93,35 @@ public:
 		std::string vertexSource = readFile("Shaders/default.vert");
 		std::string fragmentSource = readFile("Shaders/default.frag");
         Shader boundaryShader(vertexSource, fragmentSource);
+		Shader lightShader(vertexSource, fragmentSource);
 
 		int width, height;
 		glfwGetFramebufferSize(window, &width, &height);
 
-		Location u_projection = boundaryShader.uniformLocation("u_Projection");
-
 		float widthf = float(width);
 		float heightf = float(height);
 
-		if (u_projection) {
-			boundaryShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f);
-		}
+		Location u_projection = boundaryShader.uniformLocation("u_Projection");
+		if (u_projection) { boundaryShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f); }
+		
+		u_projection = lightShader.uniformLocation("u_Projection");
+		if (u_projection) { lightShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f); }
 
-		Location u_resolution = boundaryShader.uniformLocation("u_Resolution");
-		if (u_resolution) {
-			boundaryShader.uniform2f(u_resolution, widthf, heightf);
-		}
+		boundaryShader.iUniform3f(boundaryShader.uniformLocation("u_Color"), 1.0f, 1.0f, 1.0f);
+		lightShader.iUniform2f(lightShader.uniformLocation("u_Resolution"), widthf, heightf);
 
-		Location u_time = boundaryShader.uniformLocation("u_Time");
+		Location u_time = lightShader.uniformLocation("u_Time");
 		double startTime = glfwGetTime();
-		auto setShaderTime = [&, startTime](double time) {
-			if (u_time) {
-				boundaryShader.uniform1f(u_time, float(startTime - time));
-			}
+		auto setShaderTime = [&](double time) {
+			lightShader.iUniform1f(u_time, float(startTime - time));
 		};
 		
 		setShaderTime(glfwGetTime());
 
 		std::vector<Boundary> bounds;
 		bounds.reserve(16); {
-			const float wPad = 10.0f * widthf / 400.0f;
-			const float hPad = 10.0f * heightf / 400.0f;
+			const float wPad = (10.0f * widthf)  / 400.0f;
+			const float hPad = (10.0f * heightf) / 400.0f;
 
 			bounds.emplace_back(wPad, hPad, widthf - wPad, hPad);
 			bounds.emplace_back(widthf - wPad, hPad, widthf - wPad, heightf - hPad);
@@ -147,7 +144,7 @@ public:
 			bounds.emplace_back(width34 - wPad, height34 + hPad, width34 - wPad, height14 - hPad);
 
 			const float wPad5 = 5.0f * wPad;
-			const float hPad5 = 5.0f + hPad;
+			const float hPad5 = 5.0f * hPad;
 
 			bounds.emplace_back(width14 + wPad5, height14, widthf / 2.0f, heightf / 2.0f);
 			bounds.emplace_back(width34 - wPad5, height14, widthf / 2.0f, heightf / 2.0f);
@@ -157,7 +154,6 @@ public:
 
 		AngleCaster entity(widthf / 2.0f, heightf / 2.0f);
 
-		boundaryShader.bind();
 		while (!glfwWindowShouldClose(window)) {
 			double mousePosX, mousePosY;
 			glfwGetCursorPos(window, &mousePosX, &mousePosY);
@@ -172,9 +168,11 @@ public:
 			glClear(GL_COLOR_BUFFER_BIT);
 
 			// Draw caster.
+			lightShader.bind();
 			entity.draw();
 
 			// Draw boundaries.
+			boundaryShader.bind();
 			for (const Boundary& bound : bounds) {
 				bound.draw();
 			}
