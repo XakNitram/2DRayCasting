@@ -78,9 +78,63 @@ void Shader::uniform1f(const Location& location, const float v0) {
 	GLCall(glUniform1f(location, v0));
 }
 
+bool Shader::iUniform1f(const Location& location, const float v0) {
+	if (location) {
+		uniform1f(location, v0);
+		return true;
+	}
+
+	else {
+		return false;
+	}
+}
+
 void Shader::uniform2f(const Location& location, const float v0, const float v1) {
 	GLCall(glUseProgram(m_id));
 	GLCall(glUniform2f(location, v0, v1));
+}
+
+bool Shader::iUniform2f(const Location& location, const float v0, const float v1) {
+	if (location) {
+		uniform2f(location, v0, v1);
+		return true;
+	}
+
+	else {
+		return false;
+	}
+}
+
+void Shader::uniform3f(const Location& location, const float v0, const float v1, const float v2) {
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniform3f(location, v0, v1, v2));
+}
+
+bool Shader::iUniform3f(const Location& location, const float v0, const float v1, const float v2) {
+	if (location) {
+		uniform3f(location, v0, v1, v2);
+		return true;
+	}
+
+	else {
+		return false;
+	}
+}
+
+void Shader::uniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3) {
+	GLCall(glUseProgram(m_id));
+	GLCall(glUniform4f(location, v0, v1, v2, v3));
+}
+
+bool Shader::iUniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3) {
+	if (location) {
+		uniform4f(location, v0, v1, v2, v3);
+		return true;
+	}
+
+	else {
+		return false;
+	}
 }
 
 void Shader::uniform1i(const Location& location, const int v0) {

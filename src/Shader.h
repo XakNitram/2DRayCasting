@@ -26,13 +26,18 @@ public:
 	void uniformMatrix4fv(const Location& location, const float* data);
 
 	void uniform1f(const Location& location, const float v0);
-
 	void uniform2f(const Location& location, const float v0, const float v1);
+	void uniform3f(const Location& location, const float v0, const float v1, const float v2);
+	void uniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3);
+
+	bool iUniform1f(const Location& location, const float v0);
+	bool iUniform2f(const Location& location, const float v0, const float v1);
+	bool iUniform3f(const Location& location, const float v0, const float v1, const float v2);
+	bool iUniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3);
 
 	void uniform1i(const Location& location, const int v0);
 
 	void setOrthographic(const Location& location, float top, float bottom, float right, float left, float far, float near);
-	
 	void setOrthographic2D(const Location& location, float top, float bottom, float right, float left);
 
 	void bind() const;
