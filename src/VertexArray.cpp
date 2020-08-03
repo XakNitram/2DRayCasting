@@ -48,7 +48,7 @@ VertexArray::~VertexArray() {
 
 #ifdef _DEBUG
 	else {
-		std::cout << "Vertex array lifetime ended with an id of 0." << std::endl;
+		std::cout << "Vertex array " << id << " lifetime ended with an id of 0." << std::endl;
 	}
 #endif // DEBUG
 }
@@ -58,15 +58,17 @@ void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum us
 	std::cout << "Constructing array buffer of " << size << " bytes on vertex array " << id << '.' << std::endl;
 #endif // DEBUG
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, usage));
 }
 
 void VertexArray::setArrayData(GLintptr offset, GLsizeiptr size, const void* data) {
-#ifdef _DEBUG
-	std::cout << "Updating array buffer with " << size << " bytes of data." << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	std::cout << "Updating array buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
+//#endif // _DEBUG
 
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
 }
 
@@ -80,16 +82,18 @@ void VertexArray::constructIndexBuffer(GLsizei size, const void* data, GLenum us
 	
 	else {
 		GLCall(glBindVertexArray(id));
+		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
 	}
 	
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage));
 }
 
 void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* data) {
-#ifdef _DEBUG
-	std::cout << "Updating element buffer with " << size << " bytes of data." << std::endl;
-#endif // _DEBUG
+//#ifdef _DEBUG
+//	std::cout << "Updating element buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
+//#endif // _DEBUG
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
@@ -102,6 +106,7 @@ void VertexArray::attachAttribute(GLuint dimensions, GLenum type, GLsizei size) 
 		<< std::endl;
 #endif // DEBUG
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glEnableVertexArrayAttrib(id, attributeCount));
 	GLCall(glVertexAttribPointer(attributeCount, dimensions, type, GL_FALSE, size, nullptr));
 	attributeCount++;
@@ -109,11 +114,14 @@ void VertexArray::attachAttribute(GLuint dimensions, GLenum type, GLsizei size) 
 
 void VertexArray::drawArrays(GLenum mode, GLuint count) const {
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glDrawArrays(mode, 0, count));
 }
 
 void VertexArray::drawElements(GLenum mode, GLuint count, GLenum type) const {
 	ASSERT(ebo);
 	GLCall(glBindVertexArray(id));
+	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
+	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
 	GLCall(glDrawElements(mode, count, type, nullptr));
 }

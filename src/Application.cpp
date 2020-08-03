@@ -1,5 +1,6 @@
 #include <string>
 #include <iostream>
+#include <memory>
 #include <exception>
 #include <vector>
 #include "GL/glew.h"
@@ -8,12 +9,24 @@
 #include "Utils.h"
 #include "Boundary.h"
 #include "AngleCaster.h"
+#include "EndPointCaster.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
 
+struct CasterConfig {
+	float prevX, prevY;
+	std::unique_ptr<Caster> caster;
+
+	CasterConfig(std::unique_ptr<Caster>&& caster): prevX(0.0), prevY(0.0), caster(std::move(caster)) {}
+};
+
+
 class Simulation {
 	GLFWwindow* window;
+	struct {
+		unsigned int renderMode = 3;
+	} settings;
 
 	static void terminateGLFW() {
 		std::cout << "Terminating GLFW." << std::endl;
@@ -42,6 +55,22 @@ class Simulation {
 			}
 
 			Simulation& self = *static_cast<Simulation*>(userPointer);
+			
+			if (key == GLFW_KEY_1) {
+				self.settings.renderMode = 3;
+			}
+
+			else if (key == GLFW_KEY_2) {
+				self.settings.renderMode = 2;
+			}
+
+			else if (key == GLFW_KEY_3) {
+				self.settings.renderMode = 1;
+			}
+
+			else if (key == GLFW_KEY_4) {
+				self.settings.renderMode = 0;
+			}
 		}
 	}
 
@@ -93,6 +122,9 @@ public:
 		std::string vertexSource = readFile("Shaders/default.vert");
 		std::string fragmentSource = readFile("Shaders/default.frag");
         Shader boundaryShader(vertexSource, fragmentSource);
+
+		//fragmentSource = readFile("Shaders/spacetime.frag");
+		std::cout << fragmentSource << std::endl;
 		Shader lightShader(vertexSource, fragmentSource);
 
 		int width, height;
@@ -115,14 +147,14 @@ public:
 		auto setShaderTime = [&](double time) {
 			lightShader.iUniform1f(u_time, float(startTime - time));
 		};
-		
+
 		setShaderTime(glfwGetTime());
+
+		const float wPad = (10.0f * widthf) / 400.0f;
+		const float hPad = (10.0f * heightf) / 400.0f;
 
 		std::vector<Boundary> bounds;
 		bounds.reserve(16); {
-			const float wPad = (10.0f * widthf)  / 400.0f;
-			const float hPad = (10.0f * heightf) / 400.0f;
-
 			bounds.emplace_back(wPad, hPad, widthf - wPad, hPad);
 			bounds.emplace_back(widthf - wPad, hPad, widthf - wPad, heightf - hPad);
 			bounds.emplace_back(widthf - wPad, heightf - hPad, wPad, heightf - hPad);
@@ -152,14 +184,35 @@ public:
 			bounds.emplace_back(width34 - wPad5, height34, widthf / 2.0f, heightf / 2.0f);
 		}
 
-		AngleCaster entity(widthf / 2.0f, heightf / 2.0f);
+		const float width24 = widthf / 2.0f;
+		const float height24 = heightf / 2.0f;
+		const unsigned int numBounds = bounds.size();
+		CasterConfig casters[4] = {
+			CasterConfig(std::make_unique<AngleCaster>(width24, height24)),
+			CasterConfig(std::make_unique<FilledAngleCaster>(width24, height24)),
+			CasterConfig(std::make_unique<EndPointCaster>(width24, height24, numBounds)),
+			CasterConfig(std::make_unique<FilledEndPointCaster>(width24, height24, numBounds))
+		};
 
 		while (!glfwWindowShouldClose(window)) {
+			const unsigned int renderMode = settings.renderMode;
+			CasterConfig& mode = casters[renderMode];
+			auto& entity = mode.caster;
+
 			double mousePosX, mousePosY;
 			glfwGetCursorPos(window, &mousePosX, &mousePosY);
-			
-			entity.update(float(mousePosX), heightf - float(mousePosY));
-			entity.look(bounds);
+			const float mousePosXf = float(mousePosX);
+			const float mousePosYf = float(mousePosY);
+
+			if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
+				if (!(mousePosXf < wPad || mousePosXf > widthf - wPad || mousePosYf < hPad || mousePosYf > heightf - hPad)) {
+					entity->update(mousePosXf, heightf - mousePosYf);
+					entity->look(bounds);
+				}
+			}
+
+			mode.prevX = mousePosXf;
+			mode.prevY = mousePosYf;
 
 			setShaderTime(glfwGetTime());
 
@@ -169,7 +222,7 @@ public:
 
 			// Draw caster.
 			lightShader.bind();
-			entity.draw();
+			entity->draw();
 
 			// Draw boundaries.
 			boundaryShader.bind();
