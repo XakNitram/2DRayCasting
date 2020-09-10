@@ -3,10 +3,8 @@
 static constexpr float M_PI = 3.14159265358979323846f;
 static constexpr float M_TAU = M_PI * 2.0f;
 
-static const unsigned int numRays = 64;
 
 AngleCaster::AngleCaster(float x, float y): pos(x, y), vao(true) {
-	rays.reserve(numRays);
 
 	float positions[2 * (numRays + 1)];
 	unsigned int indices[2 * numRays];
@@ -16,8 +14,6 @@ AngleCaster::AngleCaster(float x, float y): pos(x, y), vao(true) {
 
 	const float slice = M_TAU / float(numRays);
 	for (unsigned int i = 0; i < numRays; i++) {
-		rays.emplace_back(pos.x, pos.y, float(i) * slice);
-
 		positions[(i + 1) * 2 + 0] = 0.0f;
 		positions[(i + 1) * 2 + 1] = 0.0f;
 
@@ -38,13 +34,6 @@ void AngleCaster::update(const float x, const float y) {
 	pos.y = y;
 
 	float positions[2] = { x, y };
-
-	for (unsigned int i = 0; i < numRays; i++) {
-		Ray& ray = rays[i];
-		ray.pos.x = x;
-		ray.pos.y = y;
-	}
-
 	vao.setArrayData(0, 2 * sizeof(float), positions);
 }
 
@@ -55,9 +44,14 @@ void AngleCaster::look(const std::vector<Boundary>& bounds) {
 	std::vector<std::unique_ptr<Point>> intersections;
 	intersections.reserve(numBounds);
 	
+	Ray ray(pos.x, pos.y, 0.0f);
+	const float slice = M_TAU / float(numRays);
+
 	// Iterate over all rays to find where they intersect.
 	for (unsigned int i = 0; i < numRays; i++) {
-		const Ray& ray = rays[i];
+		const float angle = float(i) * slice;
+		ray.dir.x = std::cosf(angle);
+		ray.dir.y = std::sinf(angle);
 
 		const unsigned int index = i * 2;
 		pushIntersections(ray, bounds, intersections);
@@ -86,8 +80,6 @@ void AngleCaster::draw() const {
 
 // Filled AngleCaster
 FilledAngleCaster::FilledAngleCaster(float x, float y): pos(x, y), vao(false) {
-	rays.reserve(numRays);
-
 	const unsigned int bufferSize = (numRays + 2) * 2;
 	float positions[bufferSize];
 	positions[0] = float(x);
@@ -95,7 +87,6 @@ FilledAngleCaster::FilledAngleCaster(float x, float y): pos(x, y), vao(false) {
 
 	const float slice = (M_TAU / float(numRays));
 	for (unsigned int i = 0; i < numRays; i++) {
-		rays.emplace_back(x, y, float(i) * slice);
 		positions[(i + 1) * 2 + 0] = float(x);
 		positions[(i + 1) * 2 + 1] = float(y);
 	}
@@ -111,11 +102,6 @@ void FilledAngleCaster::update(const float x, const float y) {
 	pos.x = x;
 	pos.y = y;
 
-	for (Ray& ray : rays) {
-		ray.pos.x = x;
-		ray.pos.y = y;
-	}
-
 	float positions[2] = { float(x), float(y) };
 	vao.setArrayData(0, 2 * sizeof(float), positions);
 }
@@ -126,9 +112,13 @@ void FilledAngleCaster::look(const std::vector<Boundary>& bounds) {
 	positions[0] = 0.0f;
 	positions[1] = 0.0f;
 
+	const float slice = (M_TAU / float(numRays));
+	Ray ray(pos.x, pos.y, 0.0f);
 	std::vector<std::unique_ptr<Point>> intersections;
 	for (unsigned int i = 0; i < numRays; i++) {
-		const Ray& ray = rays[i];
+		const float angle = float(i) * slice;
+		ray.dir.x = std::cosf(angle);
+		ray.dir.y = std::sinf(angle);
 
 		pushIntersections(ray, bounds, intersections);
 		if (intersections.size()) {

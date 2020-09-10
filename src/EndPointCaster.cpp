@@ -2,6 +2,7 @@
 
 static constexpr float M_PI = 3.14159265358979323846f;
 static constexpr float M_TAU = M_PI * 2.0f;
+static constexpr float EPSILON = 0.0001f;
 static constexpr unsigned int raysPerBound = 2 * 3;
 
 inline unsigned int calculateRays(unsigned int numWalls) {
@@ -10,10 +11,8 @@ inline unsigned int calculateRays(unsigned int numWalls) {
 
 
 // EndPointCaster
-EndPointCaster::EndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(true) {
-    const unsigned int neededRays = calculateRays(numBounds);
-    rays.reserve(neededRays);
-
+EndPointCaster::EndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(true), currentRays(calculateRays(numBounds)) {
+    const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 1);
     std::vector<float> positions(bufferSize);
     std::vector<unsigned int> indices(2 * neededRays);
@@ -22,8 +21,6 @@ EndPointCaster::EndPointCaster(float x, float y, unsigned int numBounds): pos(x,
     positions[1] = y;
 
     for (unsigned int i = 0; i < neededRays; i++) {
-        rays.emplace_back(x, y, 0.0f);
-
         positions[(i + 1) * 2 + 0] = x;
         positions[(i + 1) * 2 + 1] = y;
 
@@ -42,17 +39,10 @@ EndPointCaster::EndPointCaster(float x, float y, unsigned int numBounds): pos(x,
 void EndPointCaster::update(const float x, const float y) {
     pos.x = x;
     pos.y = y;
-    
-    const unsigned int numRays = rays.size();
-    for (Ray& ray : rays) {
-        ray.pos.x = x;
-        ray.pos.y = y;
-    }
 }
 
 void EndPointCaster::look(const std::vector<Boundary>& bounds) {
     // Add rays and lines to match the number of walls.
-    const unsigned int currentRays = rays.size();
     const unsigned int neededRays = calculateRays(bounds.size());
 
     const unsigned int bufferSize = 2 * (neededRays + 1);
@@ -61,12 +51,6 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
     positions[1] = pos.y;
 
     if (neededRays > currentRays) {
-        rays.reserve(neededRays);
-
-        for (unsigned int i = currentRays; i < neededRays; i++) {
-            rays.emplace_back(pos.x, pos.y, 0.0f);
-        }
-
         std::vector<unsigned int> indices(2 * neededRays);
         for (unsigned int i = 0; i < neededRays; i++) {
             indices[i * 2 + 0] = 0;
@@ -76,7 +60,7 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
         // Make new, bigger buffers on the GPU.
         vao.constructArrayBuffer(
             bufferSize * sizeof(float), 
-            positions.data(), 
+            nullptr, 
             GL_DYNAMIC_DRAW
         );
 
@@ -84,10 +68,13 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
             2 * neededRays * sizeof(unsigned int), 
             indices.data(), GL_DYNAMIC_DRAW
         );
+
+        currentRays = neededRays;
     }
 
     const unsigned int numRays = neededRays;
     const unsigned int numBounds = bounds.size();
+    std::vector<float> headings(numRays);
 
     // Point the rays at the wall endpoints.
     for (unsigned int i = 0; i < numBounds; i++) {
@@ -96,24 +83,22 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
         const float angleA = std::atan2f(line.a.y - pos.y, line.a.x - pos.x);
         const float angleB = std::atan2f(line.b.y - pos.y, line.b.x - pos.x);
         const float angles[raysPerBound] = {
-            angleA - 0.0001f, angleA, angleA + 0.0001f,
-            angleB - 0.0001f, angleB, angleB + 0.0001f
+            angleA - EPSILON, angleA, angleA + EPSILON,
+            angleB - EPSILON, angleB, angleB + EPSILON
         };
 
         for (unsigned int j = 0; j < raysPerBound; j++) {
-            const float angle = angles[j];
-
-            Ray& ray = rays[i * raysPerBound + j];
-
-            ray.dir.x = std::cosf(angle);
-            ray.dir.y = std::sinf(angle);
+            headings[i * raysPerBound + j] = angles[j];
         }
     }
     
+    Ray ray(pos.x, pos.y, 0.0f);
     std::vector<std::unique_ptr<Point>> intersections;
     intersections.reserve(bounds.size());
     for (unsigned int i = 0; i < numRays; i++) {
-        const Ray& ray = rays[i];
+        const float angle = headings[i];
+        ray.dir.x = std::cosf(angle);
+        ray.dir.y = std::sinf(angle);
 
         const unsigned int index = (i + 1) * 2;
         pushIntersections(ray, bounds, intersections);
@@ -136,15 +121,13 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
 }
 
 void EndPointCaster::draw() const {
-    vao.drawElements(GL_LINES, 2 * rays.size(), GL_UNSIGNED_INT);
+    vao.drawElements(GL_LINES, 2 * currentRays, GL_UNSIGNED_INT);
 }
 
 
 // Filled EndPointCaster
-FilledEndPointCaster::FilledEndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(false) {
-    const unsigned int neededRays = calculateRays(numBounds);
-    rays.reserve(neededRays);
-
+FilledEndPointCaster::FilledEndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(false), currentRays(calculateRays(numBounds)) {
+    const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 2);
     std::vector<float> positions(bufferSize);
 
@@ -152,8 +135,6 @@ FilledEndPointCaster::FilledEndPointCaster(float x, float y, unsigned int numBou
     positions[1] = y;
 
     for (unsigned int i = 0; i < neededRays; i++) {
-        rays.emplace_back(x, y, 0.0f);
-
         positions[(i + 1) * 2 + 0] = x;
         positions[(i + 1) * 2 + 1] = y;
     }
@@ -169,16 +150,10 @@ FilledEndPointCaster::FilledEndPointCaster(float x, float y, unsigned int numBou
 void FilledEndPointCaster::update(const float x, const float y) {
     pos.x = x;
     pos.y = y;
-
-    for (Ray& ray : rays) {
-        ray.pos.x = x;
-        ray.pos.y = y;
-    }
 }
 
 void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
     // Add rays and lines to match the number of walls.
-    const unsigned int currentRays = rays.size();
     const unsigned int neededRays = calculateRays(bounds.size());
 
     const unsigned int bufferSize = 2 * (neededRays + 2);
@@ -187,25 +162,20 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
     positions[1] = pos.y;
 
     if (neededRays > currentRays) {
-        rays.reserve(neededRays);
-
-        for (unsigned int i = currentRays; i < neededRays; i++) {
-            rays.emplace_back(pos.x, pos.y, 0.0f);
-        }
-
         // Make new, bigger buffers on the GPU.
         vao.constructArrayBuffer(
             bufferSize * sizeof(float),
-            positions.data(),
+            nullptr,
             GL_DYNAMIC_DRAW
         );
+
+        currentRays = neededRays;
     }
 
     const unsigned int numRays = neededRays;
     const unsigned int numBounds = bounds.size();
 
-    std::vector<RayDirection> headings;
-    headings.reserve(numRays);
+    std::vector<float> headings(numRays);
 
     // Point the rays at the wall endpoints.
     for (unsigned int i = 0; i < numBounds; i++) {
@@ -214,32 +184,26 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
         const float angleA = std::fmodf(std::atan2f(line.a.y - pos.y, line.a.x - pos.x) + M_TAU, M_TAU);
         const float angleB = std::fmodf(std::atan2f(line.b.y - pos.y, line.b.x - pos.x) + M_TAU, M_TAU);
         const float angles[raysPerBound] = {
-            angleA - 0.0001f, angleA, angleA + 0.0001f,
-            angleB - 0.0001f, angleB, angleB + 0.0001f
+            angleA - EPSILON, angleA, angleA + EPSILON,
+            angleB - EPSILON, angleB, angleB + EPSILON
         };
 
         for (unsigned int j = 0; j < raysPerBound; j++) {
-            const float angle = angles[j];
             const unsigned int index = i * raysPerBound + j;
-            
-            headings.emplace_back(index, angle);
-            Ray& ray = rays[index];
-
-            ray.dir.x = std::cosf(angle);
-            ray.dir.y = std::sinf(angle);
+            headings[index] = angles[j];
         }
     }
 
     std::sort(headings.begin(), headings.end());
 
+    Ray ray(pos.x, pos.y, 0.0f);
     std::vector<std::unique_ptr<Point>> intersections;
     intersections.reserve(numBounds);
     
     for (unsigned int i = 0; i < numRays; i++) {
-        const RayDirection& heading = headings[i];
-        const unsigned int j = heading.index;
-
-        const Ray& ray = rays[j];
+        const float angle = headings[i];
+        ray.dir.x = std::cosf(angle);
+        ray.dir.y = std::sinf(angle);
 
         const unsigned int index = (i + 1) * 2;
         pushIntersections(ray, bounds, intersections);
@@ -265,11 +229,5 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
 }
 
 void FilledEndPointCaster::draw() const {
-    vao.drawArrays(GL_TRIANGLE_FAN, rays.size() + 2);
-}
-
-FilledEndPointCaster::RayDirection::RayDirection(const unsigned int index, const float angle): index(index), angle(angle) {}
-
-bool FilledEndPointCaster::RayDirection::operator<(const RayDirection& other) {
-    return angle < other.angle;
+    vao.drawArrays(GL_TRIANGLE_FAN, currentRays + 2);
 }

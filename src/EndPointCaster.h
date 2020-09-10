@@ -6,7 +6,7 @@
 class EndPointCaster : public Caster {
     Point pos;
     VertexArray vao;
-    std::vector<Ray> rays;
+    unsigned int currentRays;
 
 public:
     EndPointCaster(float x, float y, unsigned int numBounds);
@@ -20,17 +20,9 @@ public:
 
 
 class FilledEndPointCaster : public Caster {
-    struct RayDirection {
-        unsigned int index;
-        float angle;
-
-        RayDirection(const unsigned int index, const float angle);
-        bool operator<(const RayDirection & other);
-    };
-
     Point pos;
     VertexArray vao;
-    std::vector<Ray> rays;
+    unsigned int currentRays;
 
 public:
     FilledEndPointCaster(float x, float y, unsigned int numBounds);
