@@ -14,18 +14,36 @@
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
 
+enum RenderMode {
+	LINE_ANGLE      = 0,
+	FILLED_ANGLE    = 1,
+	LINE_ENDPOINT   = 2,
+	FILLED_ENDPOINT = 3,
+};
+
+
+enum ConfigToggle {
+	SHOW_BOUNDS  = 1,
+	FOLLOW_MOUSE = 2
+};
+
+
 struct CasterConfig {
 	float prevX, prevY;
 	std::unique_ptr<Caster> caster;
 
 	CasterConfig(std::unique_ptr<Caster>&& caster): prevX(0.0), prevY(0.0), caster(std::move(caster)) {}
+	CasterConfig() : prevX(0.0f), prevY(0.0f), caster(nullptr) {}
+	
+	void setCaster(std::unique_ptr<Caster>&& caster) { this->caster = std::move(caster); }
 };
 
 
 class Simulation {
 	GLFWwindow* window;
 	struct {
-		unsigned int renderMode = 3;
+		unsigned int renderMode = FILLED_ENDPOINT;
+		unsigned int configBits = 0x0003;
 	} settings;
 
 	static void terminateGLFW() {
@@ -55,21 +73,30 @@ class Simulation {
 			}
 
 			Simulation& self = *static_cast<Simulation*>(userPointer);
-			
-			if (key == GLFW_KEY_1) {
-				self.settings.renderMode = 3;
-			}
 
-			else if (key == GLFW_KEY_2) {
-				self.settings.renderMode = 2;
-			}
-
-			else if (key == GLFW_KEY_3) {
-				self.settings.renderMode = 1;
-			}
-
-			else if (key == GLFW_KEY_4) {
-				self.settings.renderMode = 0;
+			if (action == GLFW_RELEASE) {
+				switch (key) {
+				case GLFW_KEY_1:
+					self.settings.renderMode = FILLED_ENDPOINT;
+					break;
+				case GLFW_KEY_2:
+					self.settings.renderMode = LINE_ENDPOINT;
+					break;
+				case GLFW_KEY_3:
+					self.settings.renderMode = FILLED_ANGLE;
+					break;
+				case GLFW_KEY_4:
+					self.settings.renderMode = LINE_ANGLE;
+					break;
+				case GLFW_KEY_B:
+					self.settings.configBits ^= SHOW_BOUNDS;
+					break;
+				case GLFW_KEY_SPACE:
+					self.settings.configBits ^= FOLLOW_MOUSE;
+					break;
+				default:
+					return;
+				}
 			}
 		}
 	}
@@ -79,7 +106,9 @@ public:
 		// Destructor is not called if exception is thrown from constructor.
 
 		/* Initialize GLFW. */
+#ifdef _DEBUG
 		std::cout << "Initializing GLFW." << std::endl;
+#endif // _DEBUG
 		if (!glfwInit()) {
 			throw std::exception("Failed to initialize GLFW.");
 		}
@@ -101,7 +130,7 @@ public:
 		glfwMakeContextCurrent(window);
 
 		/* Enable VSync */
-		glfwSwapInterval(1);
+		glfwSwapInterval(0);
 
 		/* Initialize GLEW. */
 		if (glewInit() != GLEW_OK) {
@@ -110,7 +139,9 @@ public:
 		}
 
 		/* Output the current OpenGL version. */
+#ifdef _DEBUG
 		std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
+#endif // _DEBUG
 	}
 
 	~Simulation() {
@@ -124,7 +155,6 @@ public:
         Shader boundaryShader(vertexSource, fragmentSource);
 
 		//fragmentSource = readFile("Shaders/spacetime.frag");
-		std::cout << fragmentSource << std::endl;
 		Shader lightShader(vertexSource, fragmentSource);
 
 		int width, height;
@@ -183,36 +213,38 @@ public:
 			bounds.emplace_back(width14 + wPad5, height34, widthf / 2.0f, heightf / 2.0f);
 			bounds.emplace_back(width34 - wPad5, height34, widthf / 2.0f, heightf / 2.0f);
 		}
-
+		
 		const float width24 = widthf / 2.0f;
 		const float height24 = heightf / 2.0f;
 		const unsigned int numBounds = bounds.size();
-		CasterConfig casters[4] = {
-			CasterConfig(std::make_unique<AngleCaster>(width24, height24)),
-			CasterConfig(std::make_unique<FilledAngleCaster>(width24, height24)),
-			CasterConfig(std::make_unique<EndPointCaster>(width24, height24, numBounds)),
-			CasterConfig(std::make_unique<FilledEndPointCaster>(width24, height24, numBounds))
-		};
+
+		CasterConfig casters[4];
+		casters[FILLED_ENDPOINT].setCaster(std::make_unique<FilledEndPointCaster>(width24, height24, numBounds));
+		casters[ LINE_ENDPOINT ].setCaster(std::make_unique<EndPointCaster>(width24, height24, numBounds));
+		casters[  FILLED_ANGLE ].setCaster(std::make_unique<FilledAngleCaster>(width24, height24));
+		casters[   LINE_ANGLE  ].setCaster(std::make_unique<AngleCaster>(width24, height24));
 
 		while (!glfwWindowShouldClose(window)) {
 			const unsigned int renderMode = settings.renderMode;
 			CasterConfig& mode = casters[renderMode];
 			auto& entity = mode.caster;
 
-			double mousePosX, mousePosY;
-			glfwGetCursorPos(window, &mousePosX, &mousePosY);
-			const float mousePosXf = float(mousePosX);
-			const float mousePosYf = float(mousePosY);
+			if (settings.configBits & FOLLOW_MOUSE) {
+				double mousePosX, mousePosY;
+				glfwGetCursorPos(window, &mousePosX, &mousePosY);
+				const float mousePosXf = static_cast<float>(mousePosX);
+				const float mousePosYf = static_cast<float>(mousePosY);
 
-			if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
-				if (!(mousePosXf < wPad || mousePosXf > widthf - wPad || mousePosYf < hPad || mousePosYf > heightf - hPad)) {
-					entity->update(mousePosXf, heightf - mousePosYf);
-					entity->look(bounds);
+				if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
+					if (!(mousePosXf < wPad || mousePosXf > widthf - wPad || mousePosYf < hPad || mousePosYf > heightf - hPad)) {
+						entity->update(mousePosXf, heightf - mousePosYf);
+						entity->look(bounds);
+					}
 				}
-			}
 
-			mode.prevX = mousePosXf;
-			mode.prevY = mousePosYf;
+				mode.prevX = mousePosXf;
+				mode.prevY = mousePosYf;
+			}
 
 			setShaderTime(glfwGetTime());
 
@@ -225,9 +257,11 @@ public:
 			entity->draw();
 
 			// Draw boundaries.
-			boundaryShader.bind();
-			for (const Boundary& bound : bounds) {
-				bound.draw();
+			if (settings.configBits & SHOW_BOUNDS) {
+				boundaryShader.bind();
+				for (const Boundary& bound : bounds) {
+					bound.draw();
+				}
 			}
 			
 			/* Swap front and back buffers. */
