@@ -13,6 +13,7 @@ constexpr unsigned int numRays = 64;
 class AngleCaster : public Caster {
 	Point pos;
 	VertexArray vao;
+	std::vector<std::unique_ptr<Point>> intersections;
 
 public:
 	AngleCaster(float x, float y);
@@ -28,6 +29,7 @@ public:
 class FilledAngleCaster : public Caster {
 	Point pos;
 	VertexArray vao;
+	std::vector<std::unique_ptr<Point>> intersections;
 
 public:
 	FilledAngleCaster(float x, float y);

@@ -7,6 +7,7 @@ class EndPointCaster : public Caster {
     Point pos;
     VertexArray vao;
     unsigned int currentRays;
+    std::vector<std::unique_ptr<Point>> intersections;
 
 public:
     EndPointCaster(float x, float y, unsigned int numBounds);
@@ -23,6 +24,7 @@ class FilledEndPointCaster : public Caster {
     Point pos;
     VertexArray vao;
     unsigned int currentRays;
+    std::vector<std::unique_ptr<Point>> intersections;
 
 public:
     FilledEndPointCaster(float x, float y, unsigned int numBounds);

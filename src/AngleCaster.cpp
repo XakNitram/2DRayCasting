@@ -5,7 +5,6 @@ static constexpr float M_TAU = M_PI * 2.0f;
 
 
 AngleCaster::AngleCaster(float x, float y): pos(x, y), vao(true) {
-
 	float positions[2 * (numRays + 1)];
 	unsigned int indices[2 * numRays];
 
@@ -40,8 +39,6 @@ void AngleCaster::update(const float x, const float y) {
 void AngleCaster::look(const std::vector<Boundary>& bounds) {
 	float positions[2 * numRays];
 	const unsigned int numBounds = bounds.size();
-
-	std::vector<std::unique_ptr<Point>> intersections;
 	intersections.reserve(numBounds);
 	
 	Ray ray(pos.x, pos.y, 0.0f);
@@ -49,6 +46,9 @@ void AngleCaster::look(const std::vector<Boundary>& bounds) {
 
 	// Iterate over all rays to find where they intersect.
 	for (unsigned int i = 0; i < numRays; i++) {
+
+		// You would think it would be better to precompute these angles but accessing 
+		// the memory it would be stored at might be slower than just computation.
 		const float angle = float(i) * slice;
 		ray.dir.x = std::cosf(angle);
 		ray.dir.y = std::sinf(angle);
@@ -107,6 +107,7 @@ void FilledAngleCaster::update(const float x, const float y) {
 }
 
 void FilledAngleCaster::look(const std::vector<Boundary>& bounds) {
+	intersections.reserve(bounds.size());
 	const unsigned int bufferSize = (numRays + 1) * 2;
 	float positions[bufferSize];
 	positions[0] = 0.0f;
@@ -114,7 +115,6 @@ void FilledAngleCaster::look(const std::vector<Boundary>& bounds) {
 
 	const float slice = (M_TAU / float(numRays));
 	Ray ray(pos.x, pos.y, 0.0f);
-	std::vector<std::unique_ptr<Point>> intersections;
 	for (unsigned int i = 0; i < numRays; i++) {
 		const float angle = float(i) * slice;
 		ray.dir.x = std::cosf(angle);

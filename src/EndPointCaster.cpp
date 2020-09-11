@@ -93,8 +93,7 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
     }
     
     Ray ray(pos.x, pos.y, 0.0f);
-    std::vector<std::unique_ptr<Point>> intersections;
-    intersections.reserve(bounds.size());
+    intersections.reserve(numBounds);
     for (unsigned int i = 0; i < numRays; i++) {
         const float angle = headings[i];
         ray.dir.x = std::cosf(angle);
@@ -197,7 +196,6 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
     std::sort(headings.begin(), headings.end());
 
     Ray ray(pos.x, pos.y, 0.0f);
-    std::vector<std::unique_ptr<Point>> intersections;
     intersections.reserve(numBounds);
     
     for (unsigned int i = 0; i < numRays; i++) {
@@ -206,7 +204,13 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
         ray.dir.y = std::sinf(angle);
 
         const unsigned int index = (i + 1) * 2;
-        pushIntersections(ray, bounds, intersections);
+        for (const Boundary& bound : bounds) {
+            auto intersection = ray.intersects(bound.line);
+            if (intersection) {
+                intersections.push_back(std::move(intersection));
+            }
+        }
+        
         if (intersections.size()) {
             std::unique_ptr<Point> shortestPath = closestIntersection(ray, intersections);
 
