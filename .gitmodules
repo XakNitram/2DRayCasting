@@ -1,3 +1,5 @@
 [submodule "LWVL"]
 	path = LWVL
 	url = https://github.com/XakNitram/LWVL.git
+[submodule "./LWVL/"]
+	branch = master

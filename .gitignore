@@ -1,2 +1,3 @@
-2DRayCasting/vendor/
 .vs/
+vendor/
+2DRayCasting/bin/
