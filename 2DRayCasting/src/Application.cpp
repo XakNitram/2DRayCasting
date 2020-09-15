@@ -1,105 +1,90 @@
 #include <iostream>
 
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
+//#include "GL/glew.h"
+//#include "GLFW/glfw3.h"
+#include "Simulation.h"
 
 
-class Simulation {
-	GLFWwindow* window;
-
-	static void terminateGLFW() {
-		std::cout << "Terminating GLFW." << std::endl;
-		glfwTerminate();
-	}
-
-	void destroyWindow() {
-		std::cout << "Destroying main window." << std::endl;
-
-		glfwSetWindowUserPointer(window, nullptr);
-		glfwDestroyWindow(window);
-		glfwPollEvents();
-	}
-
-	static void handleKeys(GLFWwindow* window, int key, int scancode, int action, int mods) {
-		if (key == GLFW_KEY_ESCAPE) {
-			glfwSetWindowShouldClose(window, true);
-			return;
-		}
-	}
-
+class RayCasting : public MainLoop {
+    double averageDelta = 0.0;
 public:
-	Simulation(unsigned int width, unsigned int height) {
-		// Destructor is not called if exception is thrown from constructor.
+    RayCasting() = default;
+    ~RayCasting() {
+        std::cout << "Average time: " << averageDelta << std::endl;
+    }
 
-		/* Initialize GLFW. */
-#ifdef _DEBUG
-		std::cout << "Initializing GLFW." << std::endl;
-#endif // _DEBUG
-		if (!glfwInit()) {
-			throw std::exception("Failed to initialize GLFW.");
-		}
+    void handleKeys(GLFWwindow* window, int key, int scancode, int action, int mods) override {
+        if (action == GLFW_RELEASE) {
+            switch (key) {
+            case GLFW_KEY_ESCAPE:
+                glfwSetWindowShouldClose(window, true);
+                return;
+            default:
+                return;
+            }
+        }
+    }
+    
+    void update(double dt) override {
+        averageDelta = (averageDelta + dt) / 2.0;
+    }
 
-		glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
+    void draw() override {
 
-		/* Create a windowed mode window and its OpenGL context. */
-		window = glfwCreateWindow(width, height, "Ray Casting", nullptr, nullptr);
-
-		if (!window) {
-			terminateGLFW();
-			throw std::exception("Failed to create GLFW window.");
-		}
-
-		glfwSetWindowUserPointer(window, this);
-		glfwSetKeyCallback(window, handleKeys);
-
-		/* Make the window's context current. */
-		glfwMakeContextCurrent(window);
-
-		/* Enable VSync */
-		glfwSwapInterval(0);
-
-		/* Initialize GLEW. */
-		if (glewInit() != GLEW_OK) {
-			this->~Simulation();
-			throw std::exception("Failed to initialize GLEW.");
-		}
-
-		/* Output the current OpenGL version. */
-#ifdef _DEBUG
-		std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
-#endif // _DEBUG
-	}
-
-	~Simulation() {
-		destroyWindow();
-		terminateGLFW();
-	}
-
-	void run() {
-		while (!glfwWindowShouldClose(window)) {
-			// Clear the screen.
-			glClear(GL_COLOR_BUFFER_BIT);
-
-			/* Swap front and back buffers. */
-			glfwSwapBuffers(window);
-
-			/* Poll for and process events. */
-			glfwPollEvents();
-		}
-	}
+    }
 };
 
 
 int main() {
-	try {
-		Simulation sim(800, 600);
-		sim.run();
+    try {
+        Simulation<RayCasting> sim(800, 600, "2D Ray Casting");
+        sim.run<0>();
+    }
 
-		return 0;
-	}
+    catch (const std::exception& e) {
+        std::cout << e.what() << std::endl;
+    }
 
-	catch (const std::exception& e) {
-		std::cout << e.what() << std::endl;
-		return -1;
-	}
+    //GLFWwindow* window;
+
+    ///* Initialize the library */
+    //if (!glfwInit())
+    //    return -1;
+
+    ///* Create a windowed mode window and its OpenGL context */
+    //window = glfwCreateWindow(640, 480, "Hello World", NULL, NULL);
+    //if (!window)
+    //{
+    //    glfwTerminate();
+    //    return -1;
+    //}
+
+    ///* Make the window's context current */
+    //glfwMakeContextCurrent(window);
+
+    //double lastFrame = glfwGetTime();
+    //double averageDelta = 0.0;
+
+    ///* Loop until the user closes the window */
+    //while (!glfwWindowShouldClose(window)) {
+    //    double currentFrame = glfwGetTime();
+    //    double dt = currentFrame - lastFrame;
+    //    lastFrame = currentFrame;
+
+    //    averageDelta = (averageDelta + dt) / 2.0;
+
+    //    /* Render here */
+    //    glClear(GL_COLOR_BUFFER_BIT);
+
+    //    /* Swap front and back buffers */
+    //    glfwSwapBuffers(window);
+
+    //    /* Poll for and process events */
+    //    glfwPollEvents();
+    //}
+
+    //std::cout << "Average time: " << averageDelta << std::endl;
+
+    //glfwTerminate();
+    //return 0;
 }
