@@ -25,6 +25,10 @@
   <ItemGroup>
     <ClInclude Include="src\Simulation.h" />
   </ItemGroup>
+  <ItemGroup>
+    <None Include="res\Shaders\default.frag" />
+    <None Include="res\Shaders\default.vert" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <Keyword>Win32Proj</Keyword>
