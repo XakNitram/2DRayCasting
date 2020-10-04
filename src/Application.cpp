@@ -129,7 +129,7 @@ public:
 		glfwSetKeyCallback(window, handleKeys);
 
 		/* Enable VSync */
-		glfwSwapInterval(0);
+		glfwSwapInterval(1);
 
 		/* Output the current OpenGL version. */
 #ifdef _DEBUG
