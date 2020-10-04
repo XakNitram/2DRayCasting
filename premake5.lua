@@ -12,8 +12,9 @@ workspace "2DRayCasting"
 
 -- %{cfg.system} and %{cfg.architecture} if the need arises.
 outputdir = "%{cfg.buildcfg}/%{prj.name}"
-builddir = "bin/%{outputdir}"
-intermediatesdir = "bin/intermediates/%{outputdir}"
+outputbase = "%{_WORKING_DIR}/bin"
+builddir = "%{outputbase}/%{outputdir}"
+intermediatesdir = "%{outputbase}/intermediates/%{outputdir}"
 
 project "2DRayCasting"
 	kind "ConsoleApp"
@@ -23,6 +24,15 @@ project "2DRayCasting"
 
 	targetdir(builddir)
 	objdir(intermediatesdir)
+	debugdir "%{builddir}"
+
+	postbuildcommands {
+		"{MKDIR} %{cfg.targetdir}/Shaders/",
+		"{COPY} res/Shaders/ %{cfg.targetdir}/Shaders/"
+	}
+
+	pchheader "rcpch.h"
+	pchsource "src/rcpch.cpp"
 
 	files {
 		"src/**.h",
@@ -48,10 +58,6 @@ project "2DRayCasting"
 
 	filter "system:not windows"
 		links { "GL" }
-
-	defines {
-
-	}
 
 	filter "configurations:Debug"
 		defines { "_DEBUG" }
