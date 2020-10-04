@@ -1,3 +1,4 @@
+#include "rcpch.h"
 #include "Caster.h"
 
 std::unique_ptr<Point> closestIntersection(const Ray& ray, std::vector<std::unique_ptr<Point>>& intersections) {

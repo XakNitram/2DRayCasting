@@ -1,10 +1,7 @@
 #pragma once
 
-#ifdef _DEBUG
-#include <iostream>
-#endif // _DEBUG
-
-#include "VertexArray.h"
+#include "rcpch.h"
+#include "Renderer/VertexArray.h"
 #include "Geometrics.h"
 
 struct Boundary {

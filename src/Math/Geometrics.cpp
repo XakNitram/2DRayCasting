@@ -1,3 +1,4 @@
+#include "rcpch.h"
 #include "Geometrics.h"
 
 // Point

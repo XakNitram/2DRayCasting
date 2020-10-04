@@ -1,5 +1,7 @@
 #pragma once
-#include <string>
+#include "rcpch.h"
+#include <glad/glad.h>
+#include "GLUtils.h"
 
 struct Location {
 	int data = -1;

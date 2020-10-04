@@ -1,15 +1,12 @@
-#include <string>
-#include <iostream>
-#include <memory>
-#include <exception>
-#include <vector>
-#include "GL/glew.h"
-#include "GLFW/glfw3.h"
-#include "Shader.h"
-#include "Utils.h"
-#include "Boundary.h"
-#include "AngleCaster.h"
-#include "EndPointCaster.h"
+#include "rcpch.h"
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+#include "Core/Utils.h"
+#include "Renderer/Shader.h"
+#include "Math/Geometrics.h"
+#include "Math/Boundary.h"
+#include "Casters/AngleCaster.h"
+#include "Casters/EndPointCaster.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
@@ -117,26 +114,22 @@ public:
 
 		/* Create a windowed mode window and its OpenGL context. */
 		window = glfwCreateWindow(width, height, "Ray Casting", nullptr, nullptr);
-
+		glfwMakeContextCurrent(window);
 		if (!window) {
 			terminateGLFW();
 			throw std::exception("Failed to create GLFW window.");
 		}
 
+		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+			this->~Simulation();
+			throw std::exception("Failed to initialize Glad.");
+		}
+
 		glfwSetWindowUserPointer(window, this);
 		glfwSetKeyCallback(window, handleKeys);
 
-		/* Make the window's context current. */
-		glfwMakeContextCurrent(window);
-
 		/* Enable VSync */
 		glfwSwapInterval(0);
-
-		/* Initialize GLEW. */
-		if (glewInit() != GLEW_OK) {
-			this->~Simulation();
-			throw std::exception("Failed to initialize GLEW.");
-		}
 
 		/* Output the current OpenGL version. */
 #ifdef _DEBUG

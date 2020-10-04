@@ -1,6 +1,5 @@
 #pragma once
-#include <memory>
-#include <cmath>
+#include "rcpch.h"
 
 struct Point {
 	float x, y;
