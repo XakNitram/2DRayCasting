@@ -1,7 +1,7 @@
 #pragma once
-#include <vector>
-#include <memory>
-#include "Boundary.h"
+#include "rcpch.h"
+#include "Math/Geometrics.h"
+#include "Math/Boundary.h"
 
 class __declspec(novtable) Caster {
 public:

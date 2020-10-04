@@ -1,6 +1,4 @@
-#include <iostream>
-#include <GL/glew.h>
-#include "GLUtils.h"
+#include "rcpch.h"
 #include "Shader.h"
 
 

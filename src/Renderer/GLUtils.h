@@ -1,7 +1,8 @@
 #pragma once
-#include <iostream>
-#include "Utils.h"
-#include "GL/glew.h"
+#include "rcpch.h"
+#include <glad/glad.h>
+#include "Core/Utils.h"
+
 
 #define GLCall(x) GLClearErrors();\
     x;\

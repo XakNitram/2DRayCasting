@@ -1,3 +1,4 @@
+#include "rcpch.h"
 #include "Utils.h"
 
 std::string readFile(const std::string& filepath) {

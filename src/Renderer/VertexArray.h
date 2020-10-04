@@ -1,12 +1,7 @@
 #pragma once
-
-#ifdef _DEBUG
-#include <iostream>
-#endif // _DEBUG
-
-#include <exception>
+#include "rcpch.h"
+#include <glad/glad.h>
 #include "GLUtils.h"
-#include "GL/glew.h"
 
 class VertexArray {
 	unsigned int id, vbo, ebo;
