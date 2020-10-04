@@ -1,3 +1,6 @@
 [submodule "vendor/GLFW"]
 	path = vendor/GLFW
 	url = git@github.com:XakNitram/GLFW.git
+[submodule "vendor/Glad"]
+	path = vendor/Glad
+	url = git@github.com:XakNitram/Glad.git
