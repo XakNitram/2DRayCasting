@@ -1,5 +1,11 @@
 #version 330 core
 
+/*
+Translated from "LiveCoding - The Universe Within" Series.
+Part 1 - https://www.youtube.com/watch?v=3CycKKJiwis
+Part 2 - https://www.youtube.com/watch?v=KGJUl8Teipk
+*/
+
 layout(location = 0) out vec4 color;
 uniform vec2 u_Resolution;
 uniform float u_Time;
@@ -100,9 +106,9 @@ void main() {
     }
 
     //vec3 base = sin(t * vec3(0.8, 0.4, 0.2)) * 0.4 + 0.6;
-    vec3 base = vec3(0.2, 0.4, 0.8);
+    vec3 base = vec3(1.0, 0.0, 0.0);
     vec3 col = m * base;
-    col += 0.1 * base;
+    //col += 0.1 * base;
 
     color = vec4(col, 1.0);
 }
