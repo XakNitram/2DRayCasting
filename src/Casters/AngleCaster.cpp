@@ -5,7 +5,7 @@ static constexpr float M_PI = 3.14159265358979323846f;
 static constexpr float M_TAU = M_PI * 2.0f;
 
 
-AngleCaster::AngleCaster(float x, float y): pos(x, y), vao(true) {
+AngleCaster::AngleCaster(): pos(0.0f, 0.0f), vao(true) {
 	float positions[2 * (numRays + 1)];
 	unsigned int indices[2 * numRays];
 
@@ -80,16 +80,16 @@ void AngleCaster::draw() const {
 
 
 // Filled AngleCaster
-FilledAngleCaster::FilledAngleCaster(float x, float y): pos(x, y), vao(false) {
+FilledAngleCaster::FilledAngleCaster(): pos(0.0f, 0.0f), vao(false) {
 	const unsigned int bufferSize = (numRays + 2) * 2;
 	float positions[bufferSize];
-	positions[0] = float(x);
-	positions[1] = float(y);
+	positions[0] = float(pos.x);
+	positions[1] = float(pos.y);
 
 	const float slice = (M_TAU / float(numRays));
 	for (unsigned int i = 0; i < numRays; i++) {
-		positions[(i + 1) * 2 + 0] = float(x);
-		positions[(i + 1) * 2 + 1] = float(y);
+		positions[(i + 1) * 2 + 0] = float(pos.x);
+		positions[(i + 1) * 2 + 1] = float(pos.y);
 	}
 
 	positions[bufferSize - 2] = positions[2];

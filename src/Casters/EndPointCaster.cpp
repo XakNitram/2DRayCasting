@@ -12,18 +12,18 @@ inline unsigned int calculateRays(unsigned int numWalls) {
 
 
 // EndPointCaster
-EndPointCaster::EndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(true), currentRays(calculateRays(numBounds)) {
+EndPointCaster::EndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(true), currentRays(calculateRays(numBounds)) {
     const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 1);
     std::vector<float> positions(bufferSize);
     std::vector<unsigned int> indices(2 * neededRays);
 
-    positions[0] = x;
-    positions[1] = y;
+    positions[0] = pos.x;
+    positions[1] = pos.x;
 
     for (unsigned int i = 0; i < neededRays; i++) {
-        positions[(i + 1) * 2 + 0] = x;
-        positions[(i + 1) * 2 + 1] = y;
+        positions[(i + 1) * 2 + 0] = pos.x;
+        positions[(i + 1) * 2 + 1] = pos.y;
 
         indices[i * 2 + 0] = 0;
         indices[i * 2 + 1] = i + 1;
@@ -126,21 +126,21 @@ void EndPointCaster::draw() const {
 
 
 // Filled EndPointCaster
-FilledEndPointCaster::FilledEndPointCaster(float x, float y, unsigned int numBounds): pos(x, y), vao(false), currentRays(calculateRays(numBounds)) {
+FilledEndPointCaster::FilledEndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(false), currentRays(calculateRays(numBounds)) {
     const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 2);
     std::vector<float> positions(bufferSize);
 
-    positions[0] = x;
-    positions[1] = y;
+    positions[0] = pos.x;
+    positions[1] = pos.y;
 
     for (unsigned int i = 0; i < neededRays; i++) {
-        positions[(i + 1) * 2 + 0] = x;
-        positions[(i + 1) * 2 + 1] = y;
+        positions[(i + 1) * 2 + 0] = pos.x;
+        positions[(i + 1) * 2 + 1] = pos.y;
     }
 
-    positions[bufferSize - 2] = x;
-    positions[bufferSize - 1] = y;
+    positions[bufferSize - 2] = pos.x;
+    positions[bufferSize - 1] = pos.y;
 
     // Construct array buffer.
     vao.constructArrayBuffer(bufferSize * sizeof(float), positions.data(), GL_DYNAMIC_DRAW);

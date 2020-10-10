@@ -15,7 +15,7 @@ class AngleCaster : public Caster {
 	std::vector<std::unique_ptr<Point>> intersections;
 
 public:
-	AngleCaster(float x, float y);
+	AngleCaster();
 
 	void update(const float x, const float y);
 
@@ -31,7 +31,7 @@ class FilledAngleCaster : public Caster {
 	std::vector<std::unique_ptr<Point>> intersections;
 
 public:
-	FilledAngleCaster(float x, float y);
+	FilledAngleCaster();
 
 	void update(const float x, const float y);
 

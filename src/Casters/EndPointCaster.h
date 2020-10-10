@@ -13,7 +13,7 @@ class EndPointCaster : public Caster {
     std::vector<std::unique_ptr<Point>> intersections;
 
 public:
-    EndPointCaster(float x, float y, unsigned int numBounds);
+    EndPointCaster(unsigned int numBounds);
 
     void update(const float x, const float y);
 
@@ -30,7 +30,7 @@ class FilledEndPointCaster : public Caster {
     std::vector<std::unique_ptr<Point>> intersections;
 
 public:
-    FilledEndPointCaster(float x, float y, unsigned int numBounds);
+    FilledEndPointCaster(unsigned int numBounds);
 
     void update(const float x, const float y);
 
