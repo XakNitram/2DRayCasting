@@ -3,10 +3,13 @@
 #include <glad/glad.h>
 #include "Core/Utils.h"
 
-
+#ifndef NDEBUG
 #define GLCall(x) GLClearErrors();\
     x;\
     ASSERT(GLLogCall(#x, __FILE__, __LINE__))
+#else
+#define GLCall(x) x
+#endif
 
 
 static void GLClearErrors() {
