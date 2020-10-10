@@ -3,45 +3,72 @@
 #include <glad/glad.h>
 #include "GLUtils.h"
 
-struct Location {
-	int data = -1;
-	operator int() const;
-	operator bool() const;
 
-	Location(const int uniformLocation);
-	Location(Location& other);
+class Uniform {
+	int m_location;
+
+	static void checkValidProgram();
+
+public:
+	Uniform();
+	Uniform(int location);
+	Uniform(const Uniform& other) = default;
+	Uniform(Uniform&& other) = default;
+
+	Uniform& operator=(const Uniform& other) = default;
+	Uniform& operator=(Uniform&& other) = default;
+
+	void set1i(const int i0);
+	void set1f(const float f0);
+	void set1u(const unsigned int u0);
+
+	void set2i(const int i0, const int i1);
+	void set2f(const float f0, const float f1);
+	void set2u(const unsigned int u0, const unsigned int u1);
+
+	void set3i(const int i0, const int i1, const int i2);
+	void set3f(const float f0, const float f1, const float f2);
+	void set3u(const unsigned int u0, const unsigned int u1, const unsigned int u2);
+
+	void set4i(const int i0, const int i1, const int i2, const int i3);
+	void set4f(const float f0, const float f1, const float f2, const float f3);
+	void set4u(const unsigned int u0, const unsigned int u1, const unsigned int u2, const unsigned int u3);
+
+	void setMatrix4(const float* data);
+	void setOrthographic(float top, float bottom, float right, float left, float far, float near);
+	void set2DOrthographic(float top, float bottom, float right, float left);
+
+	int location();
 };
+
+
+#ifndef NDEBUG
+#define ValidProgram(x) Uniform::checkValidProgram(); GLCall(x)
+#else
+#define ValidProgram(x) x
+#endif
 
 
 class Shader {
 	unsigned int m_id;
-	
-public:
-	Shader();
-	Shader(const std::string& vertexFile, const std::string& fragmentFile);
-	~Shader();
 
+	int uniformLocation(const std::string& name) const;
 	static unsigned int compileShader(int mode, const std::string& source);
 
-	[[nodiscard]] Location uniformLocation(const std::string& name) const;
+public:
+	Shader() = default;
+	Shader(const std::string& vertexFile, const std::string& fragmentFile);
+	Shader(const Shader& other) = delete;
+	Shader(Shader&& other) noexcept;
+	~Shader();
 
-	void uniformMatrix4fv(const Location& location, const float* data);
+	Shader& operator=(const Shader& other) = delete;
+	Shader& operator=(Shader&& other) noexcept;
 
-	void uniform1f(const Location& location, const float v0);
-	void uniform2f(const Location& location, const float v0, const float v1);
-	void uniform3f(const Location& location, const float v0, const float v1, const float v2);
-	void uniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3);
-
-	bool iUniform1f(const Location& location, const float v0);
-	bool iUniform2f(const Location& location, const float v0, const float v1);
-	bool iUniform3f(const Location& location, const float v0, const float v1, const float v2);
-	bool iUniform4f(const Location& location, const float v0, const float v1, const float v2, const float v3);
-
-	void uniform1i(const Location& location, const int v0);
-
-	void setOrthographic(const Location& location, float top, float bottom, float right, float left, float far, float near);
-	void setOrthographic2D(const Location& location, float top, float bottom, float right, float left);
+	unsigned int id();
+	Uniform uniform(const std::string& name);
 
 	void bind() const;
+	static void clear();
 };
 
