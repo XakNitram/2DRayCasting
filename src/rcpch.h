@@ -1,5 +1,6 @@
 #pragma once
 
+#include <assert.h>
 #include <cmath>
 #include <memory>
 #include <algorithm>
@@ -9,4 +10,5 @@
 #include <sstream>
 #include <vector>
 #include <array>
+#include <unordered_map>
 #include <iostream>
