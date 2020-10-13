@@ -12,184 +12,6 @@
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
 
-//class SimulationBack {
-//	GLFWwindow* window;
-//	struct {
-//		unsigned int renderMode = FILLED_ENDPOINT;
-//		unsigned int configBits = 0x0003;
-//	} settings;
-//
-//	static void terminateGLFW() {
-//		std::cout << "Terminating GLFW." << std::endl;
-//		glfwTerminate();
-//	}
-//
-//	void destroyWindow() {
-//		std::cout << "Destroying main window." << std::endl;
-//
-//		glfwSetWindowUserPointer(window, nullptr);
-//		glfwDestroyWindow(window);
-//		glfwPollEvents();
-//	}
-//
-//	static void handleKeys(GLFWwindow* window, int key, int scancode, int action, int mods) {
-//		if (key == GLFW_KEY_ESCAPE) {
-//			glfwSetWindowShouldClose(window, true);
-//			return;
-//		}
-//
-//		else {
-//			void* userPointer = glfwGetWindowUserPointer(window);
-//
-//			if (!userPointer) {
-//				return;
-//			}
-//
-//			SimulationBack& self = *static_cast<SimulationBack*>(userPointer);
-//
-//			if (action == GLFW_RELEASE) {
-//				switch (key) {
-//				case GLFW_KEY_1:
-//					self.settings.renderMode = FILLED_ENDPOINT;
-//					break;
-//				case GLFW_KEY_2:
-//					self.settings.renderMode = LINE_ENDPOINT;
-//					break;
-//				case GLFW_KEY_3:
-//					self.settings.renderMode = FILLED_ANGLE;
-//					break;
-//				case GLFW_KEY_4:
-//					self.settings.renderMode = LINE_ANGLE;
-//					break;
-//				case GLFW_KEY_B:
-//					self.settings.configBits ^= SHOW_BOUNDS;
-//					break;
-//				case GLFW_KEY_SPACE:
-//					self.settings.configBits ^= FOLLOW_MOUSE;
-//					break;
-//				default:
-//					return;
-//				}
-//			}
-//		}
-//	}
-//
-//public:
-//	SimulationBack(unsigned int width, unsigned int height) {
-//		// Destructor is not called if exception is thrown from constructor.
-//
-//		/* Initialize GLFW. */
-//#ifdef _DEBUG
-//		std::cout << "Initializing GLFW." << std::endl;
-//#endif // _DEBUG
-//		if (!glfwInit()) {
-//			throw std::exception("Failed to initialize GLFW.");
-//		}
-//
-//		glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
-//
-//		/* Create a windowed mode window and its OpenGL context. */
-//		window = glfwCreateWindow(width, height, "Ray Casting", nullptr, nullptr);
-//		glfwMakeContextCurrent(window);
-//		if (!window) {
-//			terminateGLFW();
-//			throw std::exception("Failed to create GLFW window.");
-//		}
-//
-//		if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
-//			this->~SimulationBack();
-//			throw std::exception("Failed to initialize Glad.");
-//		}
-//
-//		glfwSetWindowUserPointer(window, this);
-//		glfwSetKeyCallback(window, handleKeys);
-//
-//		/* Enable VSync */
-//		glfwSwapInterval(1);
-//
-//		/* Output the current OpenGL version. */
-//#ifdef _DEBUG
-//		std::cout << "OpenGL " << glGetString(GL_VERSION) << std::endl;
-//#endif // _DEBUG
-//	}
-//
-//	~SimulationBack() {
-//		destroyWindow();
-//		terminateGLFW();
-//	}
-//
-//	void run() {
-//		std::string vertexSource = readFile("Shaders/default.vert");
-//		std::string fragmentSource = readFile("Shaders/default.frag");
-//        Shader boundaryShader(vertexSource, fragmentSource);
-//
-//		//fragmentSource = readFile("Shaders/spacetime.frag");
-//		Shader lightShader(vertexSource, fragmentSource);
-//
-//		int width, height;
-//		glfwGetFramebufferSize(window, &width, &height);
-//
-//		float widthf = float(width);
-//		float heightf = float(height);
-//
-//		Location u_projection = boundaryShader.uniformLocation("u_Projection");
-//		if (u_projection) { boundaryShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f); }
-//		
-//		u_projection = lightShader.uniformLocation("u_Projection");
-//		if (u_projection) { lightShader.setOrthographic2D(u_projection, heightf, 0.0f, widthf, 0.0f); }
-//
-//		boundaryShader.iUniform3f(boundaryShader.uniformLocation("u_Color"), 1.0f, 1.0f, 1.0f);
-//		lightShader.iUniform2f(lightShader.uniformLocation("u_Resolution"), widthf, heightf);
-//
-//		while (!glfwWindowShouldClose(window)) {
-//			const unsigned int renderMode = settings.renderMode;
-//			CasterConfig& mode = casters[renderMode];
-//			auto& entity = mode.caster;
-//
-//			if (settings.configBits & FOLLOW_MOUSE) {
-//				double mousePosX, mousePosY;
-//				glfwGetCursorPos(window, &mousePosX, &mousePosY);
-//				const float mousePosXf = static_cast<float>(mousePosX);
-//				const float mousePosYf = static_cast<float>(mousePosY);
-//
-//				if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
-//					if (!(mousePosXf < wPad || mousePosXf > widthf - wPad || mousePosYf < hPad || mousePosYf > heightf - hPad)) {
-//						entity->update(mousePosXf, heightf - mousePosYf);
-//						entity->look(bounds);
-//					}
-//				}
-//
-//				mode.prevX = mousePosXf;
-//				mode.prevY = mousePosYf;
-//			}
-//
-//			setShaderTime(glfwGetTime());
-//
-//			/****** Update shaders and render. ******/
-//			// Clear the screen.
-//			glClear(GL_COLOR_BUFFER_BIT);
-//
-//			// Draw caster.
-//			lightShader.bind();
-//			entity->draw();
-//
-//			// Draw boundaries.
-//			if (settings.configBits & SHOW_BOUNDS) {
-//				boundaryShader.bind();
-//				for (const Boundary& bound : bounds) {
-//					bound.draw();
-//				}
-//			}
-//			
-//			/* Swap front and back buffers. */
-//			glfwSwapBuffers(window);
-//			/* Poll for and process events. */
-//			glfwPollEvents();
-//		}
-//	}
-//};
-
-
 constexpr unsigned int FOLLOW_MOUSE = 0b1;
 constexpr unsigned int SHOW_BOUNDS  = 0b10;
 
@@ -205,7 +27,7 @@ struct CasterConfig {
 };
 
 
-enum RenderMode: size_t {
+enum class RenderMode: size_t {
 	LINE_ANGLE,
 	FILLED_ANGLE,
 	LINE_END_POINT,
@@ -219,27 +41,29 @@ struct SimulationConfig {
 	float frameWidth, frameHeight;
 
 	SimulationConfig() : 
-		mode(FILLED_END_POINT), config(FOLLOW_MOUSE | SHOW_BOUNDS),
+		mode(RenderMode::FILLED_END_POINT), config(FOLLOW_MOUSE | SHOW_BOUNDS),
 		frameWidth(0.0f), frameHeight(0.0f)
 	{}
 };
 
 
 // Uploading time data to shader:
-class Kt25M {
+class ShaderTime {
 	Uniform m_uniform;
 	double m_start;
 
 public:
-	Kt25M() : m_start(0.0) {}
+	ShaderTime() : m_start(0.0) {}
 
-	void configure(Shader& program, const std::string& name) {
+	void configure(ShaderProgram& program, const std::string& name) {
 		m_uniform = program.uniform(name);
 	}
 
 	void set(double time) {
 		m_uniform.set1f(static_cast<float>(time - m_start));
 	}
+
+	Uniform& uniform() { return m_uniform; }
 };
 
 
@@ -252,16 +76,16 @@ protected:
 				glfwSetWindowShouldClose(window, true);
 				return;
 			case GLFW_KEY_1:
-				settings.mode = FILLED_END_POINT;
+				settings.mode = RenderMode::FILLED_END_POINT;
 				return;
 			case GLFW_KEY_2:
-				settings.mode = LINE_END_POINT;
+				settings.mode = RenderMode::LINE_END_POINT;
 				return;
 			case GLFW_KEY_3:
-				settings.mode = FILLED_ANGLE;
+				settings.mode = RenderMode::FILLED_ANGLE;
 				return;
 			case GLFW_KEY_4:
-				settings.mode = LINE_ANGLE;
+				settings.mode = RenderMode::LINE_ANGLE;
 				return;
 			case GLFW_KEY_B:
 				settings.config ^= SHOW_BOUNDS;
@@ -277,14 +101,23 @@ protected:
 
 private:
 	SimulationConfig settings;
-	Shader lineShader, lightShader;
+	ShaderProgram lineShader, lightShader;
 	std::vector<Boundary> bounds;
 	CasterConfig casters[4];
-	//Kt25M timer;
+	//ShaderTime timer;
+
+	inline std::unique_ptr<Caster>& currentCaster() {
+		return casters[static_cast<size_t>(settings.mode)].caster;
+	}
 
 public:
 	RayCasting(unsigned int width, unsigned int height) : Simulation(width, height, "RayCasting") {
 		attachKeyCallback();
+		setSwapInterval(1);
+
+		// ****** Set Up OpenGL Stuff ******
+		glEnable(GL_BLEND);
+		glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
 
 		// ****** Get Actual Frame Size ******
 		int iFrameWidth, iFrameHeight;
@@ -296,14 +129,15 @@ public:
 		settings.frameHeight = frameHeight;
 
 		// ****** Construct Shaders ******
-		std::string vertexSource = readFile("Shaders/default.vert");
-		std::string fragmentSource = readFile("Shaders/default.frag");
+		const VertexShader vertex(readFile("Shaders/default.vert"));
+		FragmentShader fragment(readFile("Shaders/default.frag"));
+		lineShader.link(vertex, fragment);
 
-		lineShader = std::move(Shader(vertexSource, fragmentSource));
-		//fragmentSource = readFile("Shaders/spacetime.frag");
-		//fragmentSource = readFile("Shaders/mazing.frag");
-		lightShader = std::move(Shader(vertexSource, fragmentSource));
+		//fragment = FragmentShader(readFile("Shaders/spacetime.frag"));
+		//fragment = FragmentShader(readFile("Shaders/mazing.frag"));
+		lightShader.link(vertex, fragment);
 
+		// ****** Initialize Shader Uniforms ******
 		lineShader.bind();
 		lineShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
 		lineShader.uniform("u_Color").set3f(1.0f, 1.0f, 1.0f);
@@ -352,10 +186,10 @@ public:
 
 		// ****** Initialize Casters ******
 		const unsigned int numBounds = bounds.size();
-		casters[FILLED_END_POINT].setCaster(std::make_unique<FilledEndPointCaster>(numBounds));
-		casters[ LINE_END_POINT ].setCaster(std::make_unique<EndPointCaster>(numBounds));
-		casters[  FILLED_ANGLE  ].setCaster(std::make_unique<FilledAngleCaster>());
-		casters[   LINE_ANGLE   ].setCaster(std::make_unique<AngleCaster>());
+		casters[static_cast<size_t>(RenderMode::FILLED_END_POINT)].setCaster(std::make_unique<FilledEndPointCaster>(numBounds));
+		casters[static_cast<size_t>(RenderMode::LINE_END_POINT)  ].setCaster(std::make_unique<EndPointCaster>(numBounds));
+		casters[static_cast<size_t>(RenderMode::FILLED_ANGLE)    ].setCaster(std::make_unique<FilledAngleCaster>());
+		casters[static_cast<size_t>(RenderMode::LINE_ANGLE)      ].setCaster(std::make_unique<AngleCaster>());
 	}
 
 	void update(double dt) final {
@@ -364,7 +198,7 @@ public:
 		const float wPad = (10.0f * frameWidth) / 400.0f;
 		const float hPad = (10.0f * frameHeight) / 400.0f;
 
-		const size_t renderMode = settings.mode;
+		const size_t renderMode = static_cast<size_t>(settings.mode);
 		CasterConfig& mode = casters[renderMode];
 		auto& entity = mode.caster;
 
@@ -387,9 +221,7 @@ public:
 	}
 
 	void draw() final {
-		const unsigned int renderMode = settings.mode;
-		CasterConfig& mode = casters[renderMode];
-		auto& entity = mode.caster;
+		auto& entity = currentCaster();
 
 		/****** Update shaders and render. ******/
 		// Clear the screen.

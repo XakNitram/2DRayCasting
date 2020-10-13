@@ -5,6 +5,7 @@
 #include <memory>
 #include <algorithm>
 #include <exception>
+#include <variant>
 #include <string>
 #include <fstream>
 #include <sstream>
