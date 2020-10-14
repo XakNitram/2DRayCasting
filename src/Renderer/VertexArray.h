@@ -6,16 +6,21 @@
 class VertexArray {
 	unsigned int id, vbo, ebo;
 	unsigned int attributeCount;
+	unsigned int stride;
 
 	void genIndexBuffer();
 
 public:
-	VertexArray(bool useElementsBuffer);
+	VertexArray(unsigned int stride, bool useElementsBuffer = false);
+	VertexArray(const VertexArray& other) = delete;
 	VertexArray(VertexArray&& other) noexcept;
 	~VertexArray();
 
+	VertexArray& operator=(const VertexArray& other) = delete;
+	VertexArray& operator=(VertexArray&& other) noexcept;
+
 	void constructArrayBuffer(GLsizei size, const void* data, GLenum usage);
-	void attachAttribute(GLuint dimensions, GLenum type, GLsizei size);
+	void attachAttribute(GLuint dimensions, GLenum type, unsigned int offset);
 	void setArrayData(GLintptr offset, GLsizeiptr size, const void* data);
 	
 	void constructIndexBuffer(GLsizei size, const void* data, GLenum usage);

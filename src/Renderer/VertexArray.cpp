@@ -11,7 +11,7 @@ void VertexArray::genIndexBuffer() {
 	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
 }
 
-VertexArray::VertexArray(bool useElementsBuffer = false): ebo(0), attributeCount(0) {
+VertexArray::VertexArray(unsigned int stride, bool useElementsBuffer): ebo(0), attributeCount(0), stride(stride) {
 	GLCall(glGenVertexArrays(1, &id));
 	GLCall(glBindVertexArray(id));
 	GLCall(glGenBuffers(1, &vbo));
@@ -23,7 +23,7 @@ VertexArray::VertexArray(bool useElementsBuffer = false): ebo(0), attributeCount
 	}
 }
 
-VertexArray::VertexArray(VertexArray&& other) noexcept : id(other.id), vbo(other.vbo), ebo(other.ebo), attributeCount(other.attributeCount) {
+VertexArray::VertexArray(VertexArray&& other) noexcept : id(other.id), vbo(other.vbo), ebo(other.ebo), attributeCount(other.attributeCount), stride(other.stride) {
 #ifdef _DEBUG
 	std::cout << "Moving vertex array " << id << '.' << std::endl;
 #endif // _DEBUG
@@ -52,6 +52,23 @@ VertexArray::~VertexArray() {
 		std::cout << "Vertex array " << id << " lifetime ended with an id of 0." << std::endl;
 	}
 #endif // DEBUG
+}
+
+VertexArray& VertexArray::operator=(VertexArray&& other) noexcept {
+#ifdef _DEBUG
+	std::cout << "Moving vertex array " << id << '.' << std::endl;
+#endif // _DEBUG
+	id = other.id;
+	vbo = other.vbo;
+	ebo = other.ebo;
+	attributeCount = other.attributeCount;
+	stride = other.stride;
+
+	other.id = 0;
+	other.vbo = 0;
+	other.ebo = 0;
+
+	return *this;
 }
 
 void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum usage) {
@@ -98,18 +115,16 @@ void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* dat
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
 
-void VertexArray::attachAttribute(GLuint dimensions, GLenum type, GLsizei size) {
+void VertexArray::attachAttribute(GLuint dimensions, GLenum type, unsigned int offset) {
 #ifdef _DEBUG
 	std::cout << "Attaching " << dimensions << "d attribute"
-		<< ", " << "location=" << attributeCount
-		<< " (" << size << " bytes)"
 		<< " on vertex array " << id << '.'
 		<< std::endl;
 #endif // DEBUG
 	GLCall(glBindVertexArray(id));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glEnableVertexArrayAttrib(id, attributeCount));
-	GLCall(glVertexAttribPointer(attributeCount, dimensions, type, GL_FALSE, size, nullptr));
+	GLCall(glVertexAttribPointer(attributeCount, dimensions, type, GL_FALSE, stride, (const void*)offset));
 	attributeCount++;
 }
 

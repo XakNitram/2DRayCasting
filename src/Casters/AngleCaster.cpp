@@ -5,7 +5,7 @@ static constexpr float M_PI = 3.14159265358979323846f;
 static constexpr float M_TAU = M_PI * 2.0f;
 
 
-AngleCaster::AngleCaster(): pos(0.0f, 0.0f), vao(true) {
+LineAngleCaster::LineAngleCaster(): pos(0.0f, 0.0f), vao(2 * sizeof(float), true) {
 	float positions[2 * (numRays + 1)];
 	unsigned int indices[2 * numRays];
 
@@ -23,13 +23,13 @@ AngleCaster::AngleCaster(): pos(0.0f, 0.0f), vao(true) {
 
 	// Construct array buffer.
 	vao.constructArrayBuffer(2 * (numRays + 1) * sizeof(float), positions, GL_DYNAMIC_DRAW);
-	vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
+	vao.attachAttribute(2, GL_FLOAT, 0);
 
 	// Construct index buffer.
 	vao.constructIndexBuffer(2 * numRays * sizeof(unsigned int), indices, GL_DYNAMIC_DRAW);
 }
 
-void AngleCaster::update(const float x, const float y) {
+void LineAngleCaster::update(const float x, const float y) {
 	pos.x = x;
 	pos.y = y;
 
@@ -37,7 +37,7 @@ void AngleCaster::update(const float x, const float y) {
 	vao.setArrayData(0, 2 * sizeof(float), positions);
 }
 
-void AngleCaster::look(const std::vector<Boundary>& bounds) {
+void LineAngleCaster::look(const std::vector<Boundary>& bounds) {
 	float positions[2 * numRays];
 	const unsigned int numBounds = bounds.size();
 	intersections.reserve(numBounds);
@@ -74,13 +74,13 @@ void AngleCaster::look(const std::vector<Boundary>& bounds) {
 	vao.setArrayData(2 * sizeof(float), 2 * numRays * sizeof(float), positions);
 }
 
-void AngleCaster::draw() const {
+void LineAngleCaster::draw() const {
 	vao.drawElements(GL_LINES, 2 * numRays, GL_UNSIGNED_INT);
 }
 
 
 // Filled AngleCaster
-FilledAngleCaster::FilledAngleCaster(): pos(0.0f, 0.0f), vao(false) {
+FilledAngleCaster::FilledAngleCaster(): pos(0.0f, 0.0f), vao(2 * sizeof(float), false) {
 	const unsigned int bufferSize = (numRays + 2) * 2;
 	float positions[bufferSize];
 	positions[0] = float(pos.x);
@@ -96,7 +96,7 @@ FilledAngleCaster::FilledAngleCaster(): pos(0.0f, 0.0f), vao(false) {
 	positions[bufferSize - 1] = positions[3];
 
 	vao.constructArrayBuffer(bufferSize * sizeof(float), positions, GL_STATIC_DRAW);
-	vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
+	vao.attachAttribute(2, GL_FLOAT, 0);
 }
 
 void FilledAngleCaster::update(const float x, const float y) {

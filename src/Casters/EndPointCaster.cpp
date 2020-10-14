@@ -12,7 +12,7 @@ inline unsigned int calculateRays(unsigned int numWalls) {
 
 
 // EndPointCaster
-EndPointCaster::EndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(true), currentRays(calculateRays(numBounds)) {
+LineEndPointCaster::LineEndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(2 * sizeof(float), true), currentRays(calculateRays(numBounds)) {
     const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 1);
     std::vector<float> positions(bufferSize);
@@ -31,18 +31,18 @@ EndPointCaster::EndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(tru
 
     // Construct array buffer.
     vao.constructArrayBuffer(bufferSize * sizeof(float), positions.data(), GL_DYNAMIC_DRAW);
-    vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
+    vao.attachAttribute(2, GL_FLOAT, 0);
 
     // Construct index buffer.
     vao.constructIndexBuffer(2 * neededRays * sizeof(unsigned int), indices.data(), GL_DYNAMIC_DRAW);
 }
 
-void EndPointCaster::update(const float x, const float y) {
+void LineEndPointCaster::update(const float x, const float y) {
     pos.x = x;
     pos.y = y;
 }
 
-void EndPointCaster::look(const std::vector<Boundary>& bounds) {
+void LineEndPointCaster::look(const std::vector<Boundary>& bounds) {
     // Add rays and lines to match the number of walls.
     const unsigned int neededRays = calculateRays(bounds.size());
 
@@ -120,13 +120,13 @@ void EndPointCaster::look(const std::vector<Boundary>& bounds) {
     vao.setArrayData(0, bufferSize * sizeof(float), positions.data());
 }
 
-void EndPointCaster::draw() const {
+void LineEndPointCaster::draw() const {
     vao.drawElements(GL_LINES, 2 * currentRays, GL_UNSIGNED_INT);
 }
 
 
 // Filled EndPointCaster
-FilledEndPointCaster::FilledEndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(false), currentRays(calculateRays(numBounds)) {
+FilledEndPointCaster::FilledEndPointCaster(unsigned int numBounds): pos(0.0f, 0.0f), vao(2 * sizeof(float), false), currentRays(calculateRays(numBounds)) {
     const unsigned int neededRays = currentRays;
     const unsigned int bufferSize = 2 * (neededRays + 2);
     std::vector<float> positions(bufferSize);
@@ -144,7 +144,7 @@ FilledEndPointCaster::FilledEndPointCaster(unsigned int numBounds): pos(0.0f, 0.
 
     // Construct array buffer.
     vao.constructArrayBuffer(bufferSize * sizeof(float), positions.data(), GL_DYNAMIC_DRAW);
-    vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
+    vao.attachAttribute(2, GL_FLOAT, 0);
 }
 
 void FilledEndPointCaster::update(const float x, const float y) {

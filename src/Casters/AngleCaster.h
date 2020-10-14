@@ -9,13 +9,13 @@
 constexpr unsigned int numRays = 64;
 
 
-class AngleCaster : public Caster {
+class LineAngleCaster : public Caster {
 	Point pos;
 	VertexArray vao;
 	std::vector<std::unique_ptr<Point>> intersections;
 
 public:
-	AngleCaster();
+	LineAngleCaster();
 
 	void update(const float x, const float y);
 
