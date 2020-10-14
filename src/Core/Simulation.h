@@ -22,13 +22,19 @@ protected:
     virtual void handleCursorEnter(int entered);
     virtual void handleMouseButton(int button, int action, int mods);
 
-    void setSwapInterval(int interval);
+    // Setting GLFW Variables
+    void swapInterval(int interval);
+
+    // GLFW Window Hints
+    static void scaleToMonitor(bool value);
 
     virtual void update(double dt);
     virtual void draw();
 
 public:
-    Simulation(unsigned int width, unsigned int height, const char* title);
+    static void initGLFW();
+
+    Simulation(unsigned int width, unsigned int height, const char* title, GLFWmonitor* = nullptr);
     virtual ~Simulation();
     void run();
 };

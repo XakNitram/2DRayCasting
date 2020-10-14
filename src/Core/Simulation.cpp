@@ -68,30 +68,35 @@ void Simulation::handleCursorEnter(int entered) {}
 void Simulation::handleMouseButton(int button, int action, int mods) {}
 
 
-void Simulation::setSwapInterval(int interval) {
+void Simulation::swapInterval(int interval) {
     glfwSwapInterval(interval);
+}
+
+void Simulation::scaleToMonitor(bool value) {
+    glfwWindowHint(GLFW_SCALE_TO_MONITOR, value);
 }
 
 void Simulation::update(double dt) {}
 
 void Simulation::draw() {}
 
-Simulation::Simulation(unsigned int width, unsigned int height, const char* title) {
-    // Destructor is not called if exception is thrown 
-
-    /* Initialize GLFW. */
+void Simulation::initGLFW() {
 #ifdef _DEBUG
     std::cout << "Initializing GLFW." << std::endl;
 #endif // _DEBUG
     if (!glfwInit()) {
         throw std::exception("Failed to initialize GLFW.");
     }
+}
 
-    /* Set window creation flags. */
-    glfwWindowHint(GLFW_SCALE_TO_MONITOR, true);
+Simulation::Simulation(unsigned int width, unsigned int height, const char* title, GLFWmonitor* monitor) {
+    // Destructor is not called if exception is thrown 
+
+    /* Initialize GLFW. */
+    initGLFW();
 
     /* Create a GLFW window and its OpenGL context. */
-    window = glfwCreateWindow(width, height, title, nullptr, nullptr);
+    window = glfwCreateWindow(width, height, title, monitor, nullptr);
     glfwMakeContextCurrent(window);
     if (!window) {
         terminate();
@@ -139,4 +144,3 @@ void Simulation::run() {
         glfwPollEvents();
     }
 }
-
