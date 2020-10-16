@@ -75,7 +75,9 @@ class Shader {
 		unsigned int id = glCreateShader(static_cast<GLenum>(mode));
 		ASSERT(GLLogCall("glCreateShader", __FILE__, __LINE__));
 		ASSERT(id != 0);
+#ifdef _DEBUG
 		std::cout << "Reserved shader " << id << std::endl;
+#endif // _DEBUG
 		return id;
 	}
 
