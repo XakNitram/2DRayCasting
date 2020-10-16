@@ -123,7 +123,7 @@ void VertexArray::attachAttribute(GLuint dimensions, GLenum type, unsigned int o
 #endif // DEBUG
 	GLCall(glBindVertexArray(id));
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glEnableVertexArrayAttrib(id, attributeCount));
+	GLCall(glEnableVertexAttribArray(attributeCount));
 	GLCall(glVertexAttribPointer(attributeCount, dimensions, type, GL_FALSE, stride, (const void*)offset));
 	attributeCount++;
 }
