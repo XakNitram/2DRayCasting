@@ -281,6 +281,7 @@ public:
 
 int main() {
 	try {
+		// Borderless window
 		RayCasting::initGLFW();
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
@@ -291,6 +292,7 @@ int main() {
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
 		RayCasting sim(mode->width, mode->height, monitor);
+		//RayCasting sim(800, 600);
 		sim.run();
 
 		return 0;
