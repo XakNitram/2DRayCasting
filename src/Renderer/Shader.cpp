@@ -3,7 +3,7 @@
 
 
 /* ****** Uniform ****** */
-void Uniform::checkValidProgram() {
+void lwvl::Uniform::checkValidProgram() {
 	int id;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &id);
 
@@ -11,31 +11,31 @@ void Uniform::checkValidProgram() {
 	assert(id != 0);
 }
 
-Uniform::Uniform(): m_location(-1) {}
+lwvl::Uniform::Uniform(): m_location(-1) {}
 
-Uniform::Uniform(int location): m_location(location) {}
+lwvl::Uniform::Uniform(int location): m_location(location) {}
 
-void Uniform::set1i(const int v0) { ValidProgram(glUniform1i(m_location, v0)); }
-void Uniform::set1f(const float v0) { ValidProgram(glUniform1f(m_location, v0)); }
-void Uniform::set1u(const unsigned int v0) { ValidProgram(glUniform1ui(m_location, v0)); }
+void lwvl::Uniform::set1i(const int v0) { ValidProgram(glUniform1i(m_location, v0)); }
+void lwvl::Uniform::set1f(const float v0) { ValidProgram(glUniform1f(m_location, v0)); }
+void lwvl::Uniform::set1u(const unsigned int v0) { ValidProgram(glUniform1ui(m_location, v0)); }
 
-void Uniform::set2i(const int v0, const int v1) { ValidProgram(glUniform2i(m_location, v0, v1)); }
-void Uniform::set2f(const float v0, const float v1) { ValidProgram(glUniform2f(m_location, v0, v1)); }
-void Uniform::set2u(const unsigned int v0, const unsigned int v1) { ValidProgram(glUniform2ui(m_location, v0, v1)); }
+void lwvl::Uniform::set2i(const int v0, const int v1) { ValidProgram(glUniform2i(m_location, v0, v1)); }
+void lwvl::Uniform::set2f(const float v0, const float v1) { ValidProgram(glUniform2f(m_location, v0, v1)); }
+void lwvl::Uniform::set2u(const unsigned int v0, const unsigned int v1) { ValidProgram(glUniform2ui(m_location, v0, v1)); }
 
-void Uniform::set3i(const int v0, const int v1, const int v2) { ValidProgram(glUniform3i(m_location, v0, v1, v2)); }
-void Uniform::set3f(const float v0, const float v1, const float v2) { ValidProgram(glUniform3f(m_location, v0, v1, v2)); }
-void Uniform::set3u(const unsigned int v0, const unsigned int v1, const unsigned int v2) { ValidProgram(glUniform3ui(m_location, v0, v1, v2)); }
+void lwvl::Uniform::set3i(const int v0, const int v1, const int v2) { ValidProgram(glUniform3i(m_location, v0, v1, v2)); }
+void lwvl::Uniform::set3f(const float v0, const float v1, const float v2) { ValidProgram(glUniform3f(m_location, v0, v1, v2)); }
+void lwvl::Uniform::set3u(const unsigned int v0, const unsigned int v1, const unsigned int v2) { ValidProgram(glUniform3ui(m_location, v0, v1, v2)); }
 
-void Uniform::set4i(const int v0, const int v1, const int v2, const int v3) { ValidProgram(glUniform4i(m_location, v0, v1, v2, v3)); }
-void Uniform::set4f(const float v0, const float v1, const float v2, const float v3) { ValidProgram(glUniform4f(m_location, v0, v1, v2, v3)); }
-void Uniform::set4u(const unsigned int v0, const unsigned int v1, const unsigned int v2, const unsigned int v3) { ValidProgram(glUniform4ui(m_location, v0, v1, v2, v3)); }
+void lwvl::Uniform::set4i(const int v0, const int v1, const int v2, const int v3) { ValidProgram(glUniform4i(m_location, v0, v1, v2, v3)); }
+void lwvl::Uniform::set4f(const float v0, const float v1, const float v2, const float v3) { ValidProgram(glUniform4f(m_location, v0, v1, v2, v3)); }
+void lwvl::Uniform::set4u(const unsigned int v0, const unsigned int v1, const unsigned int v2, const unsigned int v3) { ValidProgram(glUniform4ui(m_location, v0, v1, v2, v3)); }
 
-void Uniform::setMatrix4(const float* data) {
+void lwvl::Uniform::setMatrix4(const float* data) {
 	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, data));
 }
 
-void Uniform::setOrthographic(float top, float bottom, float right, float left, float far, float near) {
+void lwvl::Uniform::setOrthographic(float top, float bottom, float right, float left, float far, float near) {
 	float ortho[16] = {
 		// top 3 rows
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
@@ -52,7 +52,7 @@ void Uniform::setOrthographic(float top, float bottom, float right, float left, 
 	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, ortho));
 }
 
-void Uniform::set2DOrthographic(float top, float bottom, float right, float left) {
+void lwvl::Uniform::set2DOrthographic(float top, float bottom, float right, float left) {
 	float ortho[16] = {
 		// top 3 rows
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
@@ -64,17 +64,17 @@ void Uniform::set2DOrthographic(float top, float bottom, float right, float left
 	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, ortho));
 }
 
-int Uniform::location() {
+int lwvl::Uniform::location() {
 	return m_location;
 }
 
 
 /* ****** Shader Compilation Error ****** */
-shader_compilation_failure::shader_compilation_failure(const std::string& msg) : std::exception(msg.c_str()) {}
+lwvl::shader_compilation_failure::shader_compilation_failure(const std::string& msg) : std::exception(msg.c_str()) {}
 
 
 /* ****** Shader ****** */
-int ShaderProgram::uniformLocation(const std::string& name) const {
+int lwvl::ShaderProgram::uniformLocation(const std::string& name) const {
 	GLCall(const int location = glGetUniformLocation(m_id, name.c_str()));
 	if (location == -1) {
 		std::stringstream msg;
@@ -87,7 +87,7 @@ int ShaderProgram::uniformLocation(const std::string& name) const {
 	}
 }
 
-unsigned int ShaderProgram::compileShader(const int mode, const std::string& source) {
+unsigned int lwvl::ShaderProgram::compileShader(const int mode, const std::string& source) {
 	GLClearErrors();
 	const unsigned int id = glCreateShader(mode);
 	ASSERT(GLLogCall("glCreateShader", __FILE__, __LINE__));
@@ -112,7 +112,7 @@ unsigned int ShaderProgram::compileShader(const int mode, const std::string& sou
 	return id;
 }
 
-unsigned int ShaderProgram::reserveProgram() {
+unsigned int lwvl::ShaderProgram::reserveProgram() {
 	GLClearErrors();
 	unsigned int id = glCreateProgram();
 	ASSERT(GLLogCall("glCreateProgram", __FILE__, __LINE__));
@@ -123,32 +123,32 @@ unsigned int ShaderProgram::reserveProgram() {
 	return id;
 }
 
-ShaderProgram::ShaderProgram(): m_id(reserveProgram()) {}
+lwvl::ShaderProgram::ShaderProgram(): m_id(reserveProgram()) {}
 
-ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept: m_id(std::move(other.m_id)) {
+lwvl::ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept: m_id(std::move(other.m_id)) {
 	other.m_id = 0;
 }
 
-ShaderProgram::~ShaderProgram() {
+lwvl::ShaderProgram::~ShaderProgram() {
 	GLCall(glDeleteProgram(m_id));
 }
 
-ShaderProgram& ShaderProgram::operator=(ShaderProgram&& other) noexcept {
+lwvl::ShaderProgram& lwvl::ShaderProgram::operator=(ShaderProgram&& other) noexcept {
 	m_id = std::move(other.m_id);
 	other.m_id = 0;
 	return *this;
 }
 
-unsigned int ShaderProgram::id() {
+unsigned int lwvl::ShaderProgram::id() {
 	return m_id;
 }
 
-Uniform ShaderProgram::uniform(const std::string& name) {
+lwvl::Uniform lwvl::ShaderProgram::uniform(const std::string& name) {
 	int location = uniformLocation(name);
 	return { location };
 }
 
-void ShaderProgram::link() {
+void lwvl::ShaderProgram::link() {
 	/* Links the program object.
 	* https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glLinkProgram.xhtml
 	* 
@@ -181,7 +181,7 @@ void ShaderProgram::link() {
 	*/
 }
 
-void ShaderProgram::link(const VertexShader& vs, const FragmentShader& fs) {
+void lwvl::ShaderProgram::link(const VertexShader& vs, const FragmentShader& fs) {
 	GLCall(glAttachShader(m_id, vs.m_id));
 	GLCall(glAttachShader(m_id, fs.m_id));
 
@@ -191,10 +191,10 @@ void ShaderProgram::link(const VertexShader& vs, const FragmentShader& fs) {
 	GLCall(glDetachShader(m_id, fs.m_id));
 }
 
-void ShaderProgram::bind() const {
+void lwvl::ShaderProgram::bind() const {
 	GLCall(glUseProgram(m_id));
 }
 
-void ShaderProgram::clear() {
+void lwvl::ShaderProgram::clear() {
 	GLCall(glUseProgram(0));
 }

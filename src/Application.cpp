@@ -4,6 +4,8 @@
 #include "Core/Utils.h"
 #include "Core/Simulation.h"
 #include "Renderer/Shader.h"
+#include "Renderer/Texture.h"
+#include "Renderer/Framebuffer.h"
 #include "Math/Geometrics.h"
 #include "Math/Boundary.h"
 #include "Casters/AngleCaster.h"
@@ -12,7 +14,6 @@
 #include "Primitives/Floor.h"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
-
 
 constexpr unsigned int FOLLOW_MOUSE = 0b1;
 constexpr unsigned int SHOW_BOUNDS  = 0b10;
@@ -84,11 +85,11 @@ protected:
 private:
 	SimulationConfig settings;
 	GLuint floorTexture;
-	ShaderProgram lineShader, lightShader, floorShader;
+	lwvl::ShaderProgram lineShader, lightShader, floorShader;
 	std::vector<Boundary> bounds;
 	CasterConfig casters[4];
 	std::unique_ptr<Floor> floor;
-	Uniform lightCenter;
+	lwvl::Uniform lightCenter;
 
 	inline std::unique_ptr<Caster>& currentCaster() {
 		return casters[static_cast<size_t>(settings.mode)].caster;
@@ -96,7 +97,9 @@ private:
 
 public:
 	~RayCasting() final { glDeleteTextures(1, &floorTexture); }
-	RayCasting(unsigned int width, unsigned int height, GLFWmonitor* monitor = nullptr) : Simulation(width, height, "RayCasting", monitor) {
+	RayCasting(unsigned int width, unsigned int height, GLFWmonitor* monitor = nullptr) : 
+			Simulation(width, height, "RayCasting", monitor)
+	{
 		attachKeyCallback();
 		swapInterval(1);
 
@@ -141,15 +144,15 @@ public:
 
 			Quad textureBase(-1.0f, -1.0f, 2.0f, 2.0f);
 
-			ShaderProgram floorTexturePipeline;
-			VertexShader floorVertex("#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }");
-			//FragmentShader floorFragment(readFile("Shaders/default.frag"));
-			FragmentShader floorFragment(readFile("Shaders/mazing.frag"));
+			lwvl::ShaderProgram floorTexturePipeline;
+			lwvl::VertexShader floorVertex("#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }");
+			lwvl::FragmentShader floorFragment(readFile("Shaders/default.frag"));
+			//lwvl::FragmentShader floorFragment(readFile("Shaders/mazing.frag"));
 			floorTexturePipeline.link(floorVertex, floorFragment);
 
 			floorTexturePipeline.bind();
 			//floorTexturePipeline.uniform("u_Color").set3f(1.0f, 0.0f, 0.0f);
-			floorTexturePipeline.uniform("u_Resolution").set2f(floorTextureWidth, floorTextureHeight);
+			//floorTexturePipeline.uniform("u_Resolution").set2f(floorTextureWidth, floorTextureHeight);
 
 			GLsizei prevViewport[4];
 			glGetIntegerv(GL_VIEWPORT, prevViewport);
@@ -282,7 +285,7 @@ public:
 int main() {
 	try {
 		// Borderless window
-		RayCasting::initGLFW();
+		/*RayCasting::initGLFW();
 		GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 		const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 
@@ -291,8 +294,8 @@ int main() {
 		glfwWindowHint(GLFW_BLUE_BITS, mode->blueBits);
 		glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
-		RayCasting sim(mode->width, mode->height, monitor);
-		//RayCasting sim(800, 600);
+		RayCasting sim(mode->width, mode->height, monitor);*/
+		RayCasting sim(800, 600);
 		sim.run();
 
 		return 0;
