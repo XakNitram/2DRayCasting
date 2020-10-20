@@ -5,15 +5,16 @@
 
 namespace lwvl {
 	class Uniform {
-		int m_location;
+		int m_location = -1;
 
 		static void checkValidProgram();
 
 	public:
-		Uniform();
+		Uniform() = default;
 		Uniform(int location);
 		Uniform(const Uniform& other) = default;
 		Uniform(Uniform&& other) = default;
+		~Uniform() = default;
 
 		Uniform& operator=(const Uniform& other) = default;
 		Uniform& operator=(Uniform&& other) = default;
@@ -129,9 +130,8 @@ namespace lwvl {
 		}
 
 		~Shader() {
-			if (m_id != 0) {
-				GLCall(glDeleteShader(m_id));
-			}
+			// An id of 0 will be silently ignored.
+			GLCall(glDeleteShader(m_id));
 		}
 	};
 

@@ -11,8 +11,6 @@ void lwvl::Uniform::checkValidProgram() {
 	assert(id != 0);
 }
 
-lwvl::Uniform::Uniform(): m_location(-1) {}
-
 lwvl::Uniform::Uniform(int location): m_location(location) {}
 
 void lwvl::Uniform::set1i(const int v0) { ValidProgram(glUniform1i(m_location, v0)); }
@@ -130,6 +128,7 @@ lwvl::ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept: m_id(std::mo
 }
 
 lwvl::ShaderProgram::~ShaderProgram() {
+	// An id of 0 will be silently ignored.
 	GLCall(glDeleteProgram(m_id));
 }
 
