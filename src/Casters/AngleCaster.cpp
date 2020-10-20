@@ -57,10 +57,10 @@ void LineAngleCaster::look(const std::vector<Boundary>& bounds) {
 		const unsigned int index = i * 2;
 		pushIntersections(ray, bounds, intersections);
 		if (intersections.size()) {
-			std::unique_ptr<Point> shortestPath = closestIntersection(ray, intersections);
+			Point shortestPath = closestIntersection(ray, intersections);
 
-			positions[index + 0] = shortestPath->x;
-			positions[index + 1] = shortestPath->y;
+			positions[index + 0] = shortestPath.x;
+			positions[index + 1] = shortestPath.y;
 		}
 
 		else {
@@ -121,13 +121,17 @@ void FilledAngleCaster::look(const std::vector<Boundary>& bounds) {
 		ray.dir.x = std::cosf(angle);
 		ray.dir.y = std::sinf(angle);
 
+		const unsigned int index = i * 2;
 		pushIntersections(ray, bounds, intersections);
 		if (intersections.size()) {
-			std::unique_ptr<Point> shortestPath = closestIntersection(ray, intersections);
+			Point shortestPath = closestIntersection(ray, intersections);
 
-			const unsigned int index = i * 2;
-			positions[index + 0] = shortestPath->x;
-			positions[index + 1] = shortestPath->y;
+			positions[index + 0] = shortestPath.x;
+			positions[index + 1] = shortestPath.y;
+		}
+		else {
+			positions[index + 0] = pos.x;
+			positions[index + 1] = pos.y;
 		}
 
 		intersections.clear();

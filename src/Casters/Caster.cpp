@@ -1,30 +1,29 @@
 #include "rcpch.h"
 #include "Caster.h"
 
-std::unique_ptr<Point> closestIntersection(const Ray& ray, std::vector<std::unique_ptr<Point>>& intersections) {
+Point closestIntersection(const Ray& ray, std::vector<Point> intersections) {
 	const unsigned int numIntersections = intersections.size();
-	std::unique_ptr<Point> shortestPath = nullptr;
+	Point shortestPath = intersections[0];
 
-	for (unsigned int i = 0; i < numIntersections; i++) {
-		const std::unique_ptr<Point>& intersection = intersections[i];
+	for (unsigned int i = 1; i < numIntersections; i++) {
+		const Point& intersection = intersections[i];
 
-		if (!i || ray.pos.distanceTo(*intersection) < ray.pos.distanceTo(*shortestPath)) {
-			shortestPath = std::move(intersections[i]);
+		if (ray.pos.distanceTo(intersection) < ray.pos.distanceTo(shortestPath)) {
+			shortestPath = intersection;
 		}
 	}
 
-	return std::move(shortestPath);
+	return shortestPath;
 }
 
 
 void pushIntersections(
 	const Ray& ray, const std::vector<Boundary>& bounds, 
-	std::vector<std::unique_ptr<Point>>& intersections
+	std::vector<Point>& intersections
 ) {
 	for (const Boundary& bound : bounds) {
-		auto intersection = ray.intersects(bound.line);
-		if (intersection) {
-			intersections.push_back(std::move(intersection));
+		if (auto intersection = ray.intersects(bound.line)) {
+			intersections.push_back(intersection.value());
 		}
 	}
 }

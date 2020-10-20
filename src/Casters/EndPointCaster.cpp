@@ -103,10 +103,10 @@ void LineEndPointCaster::look(const std::vector<Boundary>& bounds) {
         const unsigned int index = (i + 1) * 2;
         pushIntersections(ray, bounds, intersections);
         if (intersections.size()) {
-            std::unique_ptr<Point> shortestPath = closestIntersection(ray, intersections);
+            Point shortestPath = closestIntersection(ray, intersections);
 
-            positions[index + 0] = shortestPath->x;
-            positions[index + 1] = shortestPath->y;
+            positions[index + 0] = shortestPath.x;
+            positions[index + 1] = shortestPath.y;
         }
 
         else {
@@ -205,18 +205,12 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
         ray.dir.y = std::sinf(angle);
 
         const unsigned int index = (i + 1) * 2;
-        for (const Boundary& bound : bounds) {
-            auto intersection = ray.intersects(bound.line);
-            if (intersection) {
-                intersections.push_back(std::move(intersection));
-            }
-        }
-        
+        pushIntersections(ray, bounds, intersections);
         if (intersections.size()) {
-            std::unique_ptr<Point> shortestPath = closestIntersection(ray, intersections);
+            Point shortestPath = closestIntersection(ray, intersections);
 
-            positions[index + 0] = shortestPath->x;
-            positions[index + 1] = shortestPath->y;
+            positions[index + 0] = shortestPath.x;
+            positions[index + 1] = shortestPath.y;
         }
 
         else {

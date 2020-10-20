@@ -10,6 +10,6 @@ public:
 	virtual void draw() const = 0;
 };
 
-std::unique_ptr<Point> closestIntersection(const Ray& ray, std::vector<std::unique_ptr<Point>>& intersections);
+Point closestIntersection(const Ray& ray, std::vector<Point> intersections);
 
-void pushIntersections(const Ray& ray, const std::vector<Boundary>& bounds, std::vector<std::unique_ptr<Point>>& intersections);
+void pushIntersections(const Ray& ray, const std::vector<Boundary>& bounds, std::vector<Point>& intersections);
