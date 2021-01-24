@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "pch.h"
 #include "Boundary.h"
 
 Boundary::Boundary(float x1, float y1, float x2, float y2): line(x1, y1, x2, y2), vao(2 * sizeof(float), true) {

@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "pch.h"
 #include "Caster.h"
 
 Point closestIntersection(const Ray& ray, std::vector<Point> intersections) {

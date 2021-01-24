@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "pch.h"
 #include "Quad.h"
 
 Quad::Quad(float left, float bottom, float width, float height): vao(2 * sizeof(float), true) {

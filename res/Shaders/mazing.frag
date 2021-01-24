@@ -37,7 +37,7 @@ void main() {
     float mask = smoothstep(0.01, -0.01, dto - thickness);
 
     col += mask;
-    //col += n
+    //col += n;
     //col *= vec3(1.0, 0.43, 0.78);  // pink
     col *= vec3(1.0, 0.0, 0.0);    // red
     //col *= vec3(0.996, 0.972, 0.866);

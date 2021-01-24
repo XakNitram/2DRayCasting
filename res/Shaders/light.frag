@@ -12,7 +12,7 @@ void main() {
 	vec2 correctedMouseCoord = (u_MouseCoords - u_Offset) / u_Resolution.y;
 	vec2 correctedFragCoord = (gl_FragCoord.xy - u_Offset) / u_Resolution.y;
 	
-	float d = (distance(correctedMouseCoord, correctedFragCoord));
+	float d = distance(correctedMouseCoord, correctedFragCoord);
 	float cd = clamp(pow(d, 0.5), 0.0, 1.0);
 	
 	vec4 direct = texture(u_Texture, v_TexCoords);

@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "pch.h"
 #include "Floor.h"
 
 Floor::Floor(float left, float bottom, float width, float height): vao(4 * sizeof(float)) {

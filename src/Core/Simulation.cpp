@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "pch.h"
 #include "Simulation.h"
 
 
@@ -91,6 +91,14 @@ void Simulation::initGLFW() {
 
 Simulation::Simulation(unsigned int width, unsigned int height, const char* title, GLFWmonitor* monitor) {
     // Destructor is not called if exception is thrown 
+
+    // Set GLFW window hints.
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 4);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 3);
+    glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GLFW_TRUE);
+#ifdef _DEBUG
+    glfwWindowHint(GLFW_OPENGL_DEBUG_CONTEXT, GLFW_TRUE);
+#endif // _DEBUG
 
     /* Initialize GLFW. */
     initGLFW();

@@ -1,4 +1,4 @@
-#include "rcpch.h"
+#include "../pch.h"
 #include "VertexArray.h"
 
 void VertexArray::genIndexBuffer() {

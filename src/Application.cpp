@@ -1,11 +1,10 @@
-#include "rcpch.h"
+#include "pch.h"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include "Core/Utils.h"
 #include "Core/Simulation.h"
+#include "Renderer/GLDebug.h"
 #include "Renderer/Shader.h"
-#include "Renderer/Texture.h"
-#include "Renderer/Framebuffer.h"
 #include "Math/Geometrics.h"
 #include "Math/Boundary.h"
 #include "Casters/AngleCaster.h"
@@ -51,6 +50,20 @@ struct SimulationConfig {
 
 
 class RayCasting final : public Simulation {
+	static void __stdcall debug_gl(
+		lwvl::debug::Source source, lwvl::debug::Type type, unsigned int id,
+		lwvl::debug::Severity severity, int length, const char* message,
+		const void* userState
+	) {
+		if (type == lwvl::debug::Type::ERROR) {
+			throw std::exception(message);
+		}
+
+		else {
+			std::cout << "[OpenGL] " << message << std::endl;
+		}
+	}
+
 protected:
 	void handleKeys(int key, int scancode, int action, int mods) final {
 		if (action == GLFW_RELEASE) {
@@ -83,6 +96,7 @@ protected:
 	}
 
 private:
+	lwvl::debug::GLEventListener m_listener;
 	SimulationConfig settings;
 	GLuint floorTexture;
 	lwvl::ShaderProgram lineShader, lightShader, floorShader;
@@ -97,8 +111,8 @@ private:
 
 public:
 	~RayCasting() final { glDeleteTextures(1, &floorTexture); }
-	RayCasting(unsigned int width, unsigned int height, GLFWmonitor* monitor = nullptr) : 
-			Simulation(width, height, "RayCasting", monitor)
+	RayCasting(unsigned int width, unsigned int height, GLFWmonitor* monitor = nullptr) :
+		Simulation(width, height, "RayCasting", monitor), m_listener(this, debug_gl, true)
 	{
 		attachKeyCallback();
 		swapInterval(1);
@@ -156,7 +170,7 @@ public:
 
 			GLsizei prevViewport[4];
 			glGetIntegerv(GL_VIEWPORT, prevViewport);
-			glViewport(0, 0, ftwi, fthi);
+			glViewport(0, 0, ftwi + 1, fthi + 1);
 			textureBase.draw();
 			glViewport(0, 0, prevViewport[2], prevViewport[3]);
 

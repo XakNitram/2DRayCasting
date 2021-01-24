@@ -1,5 +1,5 @@
 #pragma once
-#include "rcpch.h"
+#include "../pch.h"
 #include <glad/glad.h>
 #include "GLUtils.h"
 
