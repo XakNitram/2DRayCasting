@@ -9,21 +9,26 @@ void lwvl::debug::clearErrors() {
     while (glGetError() != GL_NO_ERROR);
 }
 
-void lwvl::debug::GLEventListener::assign(LWVLDebugProc callback) {
-    glDebugMessageCallback([](GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length, const GLchar* message, const void* state) {
-        ((GLEventListener*)state)->invoke(source, type, id, severity, length, message);
-    }, this);
+void __stdcall lwvl::debug::glDebugCallback(
+        GLenum source, GLenum type, GLuint id, GLenum severity, GLsizei length,
+        const GLchar *message, const void *state
+) {
+    ((GLEventListener *) state)->invoke(source, type, id, severity, length, message);
+}
+
+void lwvl::debug::GLEventListener::assign() {
+    glDebugMessageCallback(glDebugCallback, this);
 }
 
 lwvl::debug::GLEventListener::GLEventListener(void* userPtr, LWVLDebugProc callback, bool enabled): m_callback(callback), m_userPtr(userPtr) {
-    assign(std::forward<LWVLDebugProc>(callback));
+    assign();
     if (enabled) {
         control(true);
     }
 }
 
 lwvl::debug::GLEventListener::GLEventListener(LWVLDebugProc callback, bool enabled): m_callback(callback), m_userPtr(nullptr) {
-    assign(std::forward<LWVLDebugProc>(callback));
+    assign();
     if (enabled) {
         control(true);
     }

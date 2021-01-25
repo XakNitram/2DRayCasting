@@ -19,27 +19,27 @@ namespace lwvl {
 		Uniform& operator=(const Uniform& other) = default;
 		Uniform& operator=(Uniform&& other) = default;
 
-		void set1i(const int i0);
-		void set1f(const float f0);
-		void set1u(const unsigned int u0);
+		void set1i(int i0);
+		void set1f(float f0);
+		void set1u(unsigned int u0);
 
-		void set2i(const int i0, const int i1);
-		void set2f(const float f0, const float f1);
-		void set2u(const unsigned int u0, const unsigned int u1);
+		void set2i(int i0, int i1);
+		void set2f(float f0, float f1);
+		void set2u(unsigned int u0, unsigned int u1);
 
-		void set3i(const int i0, const int i1, const int i2);
-		void set3f(const float f0, const float f1, const float f2);
-		void set3u(const unsigned int u0, const unsigned int u1, const unsigned int u2);
+		void set3i(int i0, int i1, int i2);
+		void set3f(float f0, float f1, float f2);
+		void set3u(unsigned int u0, unsigned int u1, unsigned int u2);
 
-		void set4i(const int i0, const int i1, const int i2, const int i3);
-		void set4f(const float f0, const float f1, const float f2, const float f3);
-		void set4u(const unsigned int u0, const unsigned int u1, const unsigned int u2, const unsigned int u3);
+		void set4i(int i0, int i1, int i2, int i3);
+		void set4f(float f0, float f1, float f2, float f3);
+		void set4u(unsigned int u0, unsigned int u1, unsigned int u2, unsigned int u3);
 
 		void setMatrix4(const float* data);
 		void setOrthographic(float top, float bottom, float right, float left, float far, float near);
 		void set2DOrthographic(float top, float bottom, float right, float left);
 
-		int location();
+		int location() const;
 	};
 
 
@@ -52,7 +52,7 @@ namespace lwvl {
 
 	class shader_compilation_failure : public std::exception {
 	public:
-		shader_compilation_failure(const std::string& msg);
+		explicit shader_compilation_failure(const std::string& msg);
 	};
 
 
@@ -83,7 +83,11 @@ namespace lwvl {
 		}
 
 	public:
-		Shader(const std::string& source) : m_id(reserveShader()) {
+
+// We want implicit constructors for ShaderProgram.link("a.vert", "b.frag")
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "google-explicit-constructor"
+        [[maybe_unused]] Shader(const std::string& source) : m_id(reserveShader()) {
 			const char* src = source.c_str();
 			GLCall(glShaderSource(m_id, 1, &src, nullptr));
 
@@ -117,6 +121,7 @@ namespace lwvl {
 			}
 			GLLogErrors();
 		}
+#pragma clang diagnostic pop
 		Shader(const Shader& other) = delete;
 		Shader(Shader&& other) noexcept : m_id(other.m_id) {
 			other.m_id = 0;
@@ -163,7 +168,7 @@ namespace lwvl {
 	class ShaderProgram {
 		unsigned int m_id;
 
-		int uniformLocation(const std::string& name) const;
+		[[nodiscard]] int uniformLocation(const std::string& name) const;
 		static unsigned int compileShader(int mode, const std::string& source);
 		static unsigned int reserveProgram();
 
@@ -176,7 +181,7 @@ namespace lwvl {
 		ShaderProgram& operator=(const ShaderProgram& other) = delete;
 		ShaderProgram& operator=(ShaderProgram&& other) noexcept;
 
-		unsigned int id();
+		unsigned int id() const;
 		Uniform uniform(const std::string& name);
 
 		template<ShaderType target>

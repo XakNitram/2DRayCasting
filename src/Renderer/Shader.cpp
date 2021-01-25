@@ -13,6 +13,9 @@ void lwvl::Uniform::checkValidProgram() {
 
 lwvl::Uniform::Uniform(int location): m_location(location) {}
 
+// These are not const because they modify the OpenGL Context. Open for reinterpretation.
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-make-member-function-const"
 void lwvl::Uniform::set1i(const int v0) { ValidProgram(glUniform1i(m_location, v0)); }
 void lwvl::Uniform::set1f(const float v0) { ValidProgram(glUniform1f(m_location, v0)); }
 void lwvl::Uniform::set1u(const unsigned int v0) { ValidProgram(glUniform1ui(m_location, v0)); }
@@ -34,7 +37,7 @@ void lwvl::Uniform::setMatrix4(const float* data) {
 }
 
 void lwvl::Uniform::setOrthographic(float top, float bottom, float right, float left, float far, float near) {
-	float ortho[16] = {
+	float projectionMatrix[16] = {
 		// top 3 rows
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
@@ -47,11 +50,11 @@ void lwvl::Uniform::setOrthographic(float top, float bottom, float right, float 
 		1.0f
 	};
 
-	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, ortho));
+	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, projectionMatrix));
 }
 
 void lwvl::Uniform::set2DOrthographic(float top, float bottom, float right, float left) {
-	float ortho[16] = {
+	float projectionMatrix[16] = {
 		// top 3 rows
 		2.0f / (right - left), 0.0f, 0.0f, 0.0f,
 		0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
@@ -59,10 +62,11 @@ void lwvl::Uniform::set2DOrthographic(float top, float bottom, float right, floa
 		-(right + left) / (right - left), -(top + bottom) / (top - bottom), 0.0f, 1.0f
 	};
 
-	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, ortho));
+	GLCall(glUniformMatrix4fv(m_location, 1, GL_FALSE, projectionMatrix));
 }
+#pragma clang diagnostic pop
 
-int lwvl::Uniform::location() {
+int lwvl::Uniform::location() const {
 	return m_location;
 }
 
@@ -123,7 +127,7 @@ unsigned int lwvl::ShaderProgram::reserveProgram() {
 
 lwvl::ShaderProgram::ShaderProgram(): m_id(reserveProgram()) {}
 
-lwvl::ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept: m_id(std::move(other.m_id)) {
+lwvl::ShaderProgram::ShaderProgram(ShaderProgram&& other) noexcept: m_id(other.m_id) {
 	other.m_id = 0;
 }
 
@@ -133,12 +137,12 @@ lwvl::ShaderProgram::~ShaderProgram() {
 }
 
 lwvl::ShaderProgram& lwvl::ShaderProgram::operator=(ShaderProgram&& other) noexcept {
-	m_id = std::move(other.m_id);
+	m_id = other.m_id;
 	other.m_id = 0;
 	return *this;
 }
 
-unsigned int lwvl::ShaderProgram::id() {
+unsigned int lwvl::ShaderProgram::id() const {
 	return m_id;
 }
 
@@ -147,6 +151,8 @@ lwvl::Uniform lwvl::ShaderProgram::uniform(const std::string& name) {
 	return { location };
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-make-member-function-const"
 void lwvl::ShaderProgram::link() {
 	/* Links the program object.
 	* https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glLinkProgram.xhtml
@@ -179,6 +185,7 @@ void lwvl::ShaderProgram::link() {
 	* Therefore, applications are advised to make calls to glValidateProgram to detect these issues during application development.
 	*/
 }
+#pragma clang diagnostic pop
 
 void lwvl::ShaderProgram::link(const VertexShader& vs, const FragmentShader& fs) {
 	GLCall(glAttachShader(m_id, vs.m_id));

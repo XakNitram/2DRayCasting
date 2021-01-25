@@ -71,6 +71,8 @@ VertexArray& VertexArray::operator=(VertexArray&& other) noexcept {
 	return *this;
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-make-member-function-const"
 void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum usage) {
 #ifdef _DEBUG
 	std::cout << "Constructing array buffer of " << size << " bytes on vertex array " << id << '.' << std::endl;
@@ -89,6 +91,7 @@ void VertexArray::setArrayData(GLintptr offset, GLsizeiptr size, const void* dat
 	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
 	GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
 }
+#pragma clang diagnostic pop
 
 void VertexArray::constructIndexBuffer(GLsizei size, const void* data, GLenum usage) {
 #ifdef _DEBUG
@@ -106,6 +109,8 @@ void VertexArray::constructIndexBuffer(GLsizei size, const void* data, GLenum us
 	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage));
 }
 
+#pragma clang diagnostic push
+#pragma ide diagnostic ignored "readability-make-member-function-const"
 void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* data) {
 //#ifdef _DEBUG
 //	std::cout << "Updating element buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
@@ -114,6 +119,7 @@ void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* dat
 	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
 	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
 }
+#pragma clang diagnostic pop
 
 void VertexArray::attachAttribute(GLuint dimensions, GLenum type, unsigned int offset) {
 #ifdef _DEBUG

@@ -22,10 +22,10 @@ struct CasterConfig {
 	float prevX, prevY;
 	std::unique_ptr<Caster> caster;
 
-	CasterConfig(std::unique_ptr<Caster>&& caster) : prevX(0.0), prevY(0.0), caster(std::move(caster)) {}
+	explicit CasterConfig(std::unique_ptr<Caster>&& caster) : prevX(0.0), prevY(0.0), caster(std::move(caster)) {}
 	CasterConfig() : prevX(0.0f), prevY(0.0f), caster(nullptr) {}
 
-	void setCaster(std::unique_ptr<Caster>&& caster) { this->caster = std::move(caster); }
+	void setCaster(std::unique_ptr<Caster>&& newCaster) { this->caster = std::move(newCaster); }
 };
 
 
@@ -98,7 +98,7 @@ protected:
 private:
 	lwvl::debug::GLEventListener m_listener;
 	SimulationConfig settings;
-	GLuint floorTexture;
+	GLuint floorTexture = 0;
 	lwvl::ShaderProgram lineShader, lightShader, floorShader;
 	std::vector<Boundary> bounds;
 	CasterConfig casters[4];
@@ -127,8 +127,8 @@ public:
 		int iFrameWidth, iFrameHeight;
 		glfwGetFramebufferSize(window, &iFrameWidth, &iFrameHeight);
 
-		const float frameWidth = static_cast<float>(iFrameWidth);
-		const float frameHeight = static_cast<float>(iFrameHeight);
+		const auto frameWidth = static_cast<float>(iFrameWidth);
+		const auto frameHeight = static_cast<float>(iFrameHeight);
 		settings.frameWidth  = frameWidth;
 		settings.frameHeight = frameHeight;
 
@@ -142,14 +142,14 @@ public:
 
 		// ****** Render Floor Texture ******
 		glGenTextures(1, &floorTexture); {
-			GLsizei ftwi = static_cast<GLsizei>(floorTextureWidth);
-			GLsizei fthi = static_cast<GLsizei>(floorTextureHeight);
+			auto integerFloorWidth = static_cast<GLsizei>(floorTextureWidth);
+			auto integerFloorHeight = static_cast<GLsizei>(floorTextureHeight);
 			GLuint floorFrame;
 			glGenFramebuffers(1, &floorFrame);
 			glBindFramebuffer(GL_FRAMEBUFFER, floorFrame);
 
 			glBindTexture(GL_TEXTURE_2D, floorTexture);
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, ftwi, fthi, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, integerFloorWidth, integerFloorHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, nullptr);
 
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
@@ -170,7 +170,7 @@ public:
 
 			GLsizei prevViewport[4];
 			glGetIntegerv(GL_VIEWPORT, prevViewport);
-			glViewport(0, 0, ftwi + 1, fthi + 1);
+			glViewport(0, 0, integerFloorWidth + 1, integerFloorHeight + 1);
 			textureBase.draw();
 			glViewport(0, 0, prevViewport[2], prevViewport[3]);
 
@@ -246,15 +246,15 @@ public:
 		const float wPad = (10.0f * frameWidth) / 400.0f;
 		const float hPad = (10.0f * frameHeight) / 400.0f;
 
-		const size_t renderMode = static_cast<size_t>(settings.mode);
+		const auto renderMode = static_cast<size_t>(settings.mode);
 		CasterConfig& mode = casters[renderMode];
 		auto& entity = mode.caster;
 
 		if (settings.config & FOLLOW_MOUSE) {
 			double mousePosX, mousePosY;
 			glfwGetCursorPos(window, &mousePosX, &mousePosY);
-			const float mousePosXf = static_cast<float>(mousePosX);
-			const float mousePosYf = static_cast<float>(mousePosY);
+			const auto mousePosXf = static_cast<float>(mousePosX);
+			const auto mousePosYf = static_cast<float>(mousePosY);
 
 			if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
 				if (!(mousePosXf < wPad || mousePosXf > frameWidth - wPad || mousePosYf < hPad || mousePosYf > frameHeight - hPad)) {

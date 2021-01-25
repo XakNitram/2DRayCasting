@@ -4,14 +4,16 @@
 #include "GLUtils.h"
 
 class VertexArray {
-	unsigned int id, vbo, ebo;
+	uint32_t id = 0;
+	uint32_t vbo = 0;
+	uint32_t ebo = 0;
 	unsigned int attributeCount;
 	unsigned int stride;
 
 	void genIndexBuffer();
 
 public:
-	VertexArray(unsigned int stride, bool useElementsBuffer = false);
+	explicit VertexArray(unsigned int stride, bool useElementsBuffer = false);
 	VertexArray(const VertexArray& other) = delete;
 	VertexArray(VertexArray&& other) noexcept;
 	~VertexArray();
