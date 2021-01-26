@@ -7,6 +7,7 @@ Translated from "Shader Coding: Truchet Tiling Explained"
 
 layout(location = 0) out vec4 final;  // layout 0 so we can render to GL_COLOR_ATTACHMENT0
 uniform vec2 u_Resolution;
+uniform vec3 u_Color = vec3(1.0, 0.0, 0.0);
 //uniform float u_Time;
 
 float Hash21(vec2 p) {
@@ -38,9 +39,7 @@ void main() {
 
     col += mask;
     //col += n;
-    //col *= vec3(1.0, 0.43, 0.78);  // pink
-    col *= vec3(1.0, 0.0, 0.0);    // red
-    //col *= vec3(0.996, 0.972, 0.866);
+    col *= u_Color;
 
     //if (gv.x > 0.48 || gv.y > 0.48) { col = vec3(1, 0, 0); }
     final = vec4(col, 1.0);

@@ -6,7 +6,9 @@ layout(location = 0) out vec4 final;
 uniform sampler2D u_Texture;
 
 void main() {
-	vec4 direct = texture(u_Texture, v_TexCoords);
+	vec3 ambientColor = vec3(1.0, 1.0, 1.0);
+	vec4 floorColor = texture(u_Texture, v_TexCoords);
+	vec3 gamma = vec3(1.0 / 2.2);
 
 	//rec601 NTSC luma
 	//float luma = (0.299 * direct.r) + (0.587 * direct.g) + (0.114 * direct.b);
@@ -15,9 +17,10 @@ void main() {
 	//float luma = (0.2126 * direct.r) + (0.7152 * direct.g) + (0.0722 * direct.b);
 
 	//ITU-R BT.2100 HDR luma
-	float luma = (0.2627 * direct.r) + (0.6780 * direct.g) + (0.0593 * direct.b);
+//	float luma = (0.2627 * floorColor.r) + (0.6780 * floorColor.g) + (0.0593 * floorColor.b);
+//	vec3 gray = vec3(luma);
 
-	float finalBrightness = 0.25 * luma;
-
-	final = vec4(finalBrightness, finalBrightness, finalBrightness, 1.0);
+	float ambientStrength = 0.0125;
+	vec3 ambient = ambientStrength * ambientColor;
+	final = vec4(pow(ambient * floorColor.rgb, gamma), 1.0);
 }

@@ -161,12 +161,16 @@ public:
 			lwvl::ShaderProgram floorTexturePipeline;
 			lwvl::VertexShader floorVertex("#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }");
 			lwvl::FragmentShader floorFragment(readFile("Shaders/default.frag"));
-			//lwvl::FragmentShader floorFragment(readFile("Shaders/mazing.frag"));
+//			lwvl::FragmentShader floorFragment(readFile("Shaders/mazing.frag"));
 			floorTexturePipeline.link(floorVertex, floorFragment);
 
 			floorTexturePipeline.bind();
-			//floorTexturePipeline.uniform("u_Color").set3f(1.0f, 0.0f, 0.0f);
-			//floorTexturePipeline.uniform("u_Resolution").set2f(floorTextureWidth, floorTextureHeight);
+
+            // Floor color
+			floorTexturePipeline.uniform("u_Color").set3f(1.00000f, 1.00000f, 1.00000f);  // White
+//			floorTexturePipeline.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
+
+//			floorTexturePipeline.uniform("u_Resolution").set2f(floorTextureWidth, floorTextureHeight);
 
 			GLsizei prevViewport[4];
 			glGetIntegerv(GL_VIEWPORT, prevViewport);
@@ -179,10 +183,10 @@ public:
 		}
 
 		// ****** Construct Shaders ******
-		lineShader.link(readFile("Shaders/default.vert"), readFile("Shaders/default.frag"));
-		lightShader.link(readFile("Shaders/light.vert"), readFile("Shaders/light.frag"));
+		lineShader.link({readFile("Shaders/default.vert")}, {readFile("Shaders/default.frag")});
+		lightShader.link({readFile("Shaders/light.vert")}, {readFile("Shaders/light.frag")});
 		//lightShader.link(readFile("Shaders/light.vert"), readFile("Shaders/floor.frag"));
-		floorShader.link(readFile("Shaders/floor.vert"), readFile("Shaders/floor.frag"));
+		floorShader.link({readFile("Shaders/floor.vert")}, {readFile("Shaders/floor.frag")});
 
 		// ****** Initialize Shader Uniforms ******
 		lineShader.bind();
@@ -193,6 +197,8 @@ public:
 		lightShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
 		lightShader.uniform("u_Resolution").set2f(floorTextureWidth, floorTextureHeight);
 		lightShader.uniform("u_Offset").set2f(wPad, hPad);
+//        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
+        lightShader.uniform("u_LightColor").set3f(0.30980f, 0.00392f, 0.27843f);  // Tyrian Purple
 		lightShader.uniform("u_Texture").set1i(0);
 		lightCenter = lightShader.uniform("u_MouseCoords");
 
