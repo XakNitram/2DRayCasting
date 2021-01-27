@@ -20,7 +20,7 @@ void main() {
 //	float luma = (0.2627 * floorColor.r) + (0.6780 * floorColor.g) + (0.0593 * floorColor.b);
 //	vec3 gray = vec3(luma);
 
-	float ambientStrength = 0.0125;
+	float ambientStrength = 0.00625;
 	vec3 ambient = ambientStrength * ambientColor;
 	final = vec4(pow(ambient * floorColor.rgb, gamma), 1.0);
 }

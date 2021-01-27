@@ -23,8 +23,9 @@ void main() {
 	float d = spaceCorrectionFactor * length(correctedMouseCoord - correctedFragCoord);
 	float attenuation = 1.0/(1.0 + 0.045 * d + 0.0075 * d * d);
 
-	float ambientStrength = 0.0125;
+	float ambientStrength = 0.00625;
 	vec3 ambient = ambientStrength * ambientColor;
+
 
 	float diff = max(dot(lightNormal, lightDir), 0.0);
 	vec3 diffuse = diff * u_LightColor;
