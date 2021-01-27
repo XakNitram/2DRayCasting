@@ -3,38 +3,38 @@ add_executable(
         ray-casting Application.cpp
 
         # CASTERS
-        Casters/Caster.h
+        Casters/Caster.hpp
         Casters/Caster.cpp
-        Casters/AngleCaster.h
+        Casters/AngleCaster.hpp
         Casters/AngleCaster.cpp
-        Casters/EndPointCaster.h
+        Casters/EndPointCaster.hpp
         Casters/EndPointCaster.cpp
 
         # CORE
-        Core/Utils.h
+        Core/Utils.hpp
         Core/Utils.cpp
-        Core/Simulation.h
+        Core/Simulation.hpp
         Core/Simulation.cpp
 
         # MATH
-        Math/Geometrics.h
+        Math/Geometrics.hpp
         Math/Geometrics.cpp
-        Math/Boundary.h
-        Math/Boundary.cpp
 
         # PRIMITIVES
-        Primitives/Floor.h
+        Primitives/Boundary.hpp
+        Primitives/Boundary.cpp
+        Primitives/Floor.hpp
         Primitives/Floor.cpp
-        Primitives/Quad.h
+        Primitives/Quad.hpp
         Primitives/Quad.cpp
 
         # RENDERER
-        Renderer/GLUtils.h
-        Renderer/GLDebug.h
+        Renderer/Buffer.hpp
+        Renderer/GLDebug.hpp
         Renderer/GLDebug.cpp
-        Renderer/Shader.h
+        Renderer/Shader.hpp
         Renderer/Shader.cpp
-        Renderer/VertexArray.h
+        Renderer/VertexArray.hpp
         Renderer/VertexArray.cpp
 )
 
@@ -46,7 +46,7 @@ target_link_libraries(ray-casting PRIVATE glad)
 target_link_libraries(ray-casting PRIVATE glfw)
 
 # Use precompiled headers.
-target_precompile_headers(ray-casting PRIVATE pch.h pch.cpp)
+target_precompile_headers(ray-casting PRIVATE pch.hpp pch.cpp)
 
 # Mark the project as C++ 17 and set the output directory.
 set_target_properties(

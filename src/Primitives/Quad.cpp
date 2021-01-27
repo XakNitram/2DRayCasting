@@ -1,7 +1,7 @@
-#include "pch.h"
-#include "Quad.h"
+#include "pch.hpp"
+#include "Quad.hpp"
 
-Quad::Quad(float left, float bottom, float width, float height): vao(2 * sizeof(float), true) {
+Quad::Quad(float left, float bottom, float width, float height) {
     float positions[8] {
         left,         bottom,
         left + width, bottom,
@@ -9,24 +9,36 @@ Quad::Quad(float left, float bottom, float width, float height): vao(2 * sizeof(
         left,         bottom + height
     };
 
-    vao.constructArrayBuffer(sizeof(positions), positions, GL_STATIC_DRAW);
-    vao.attachAttribute(2, GL_FLOAT, 0);
+    vao.bind();
+    vbo.bind();
+    vbo.usage(lwvl::Usage::Static);
+    vbo.construct(positions, 8);
+    vao.attribute(2, GL_FLOAT, 2 * sizeof(float), 0);
 
-    unsigned int indices[6] {
+    uint8_t indices[6] {
         0, 1, 2,
         2, 3, 0
     };
 
-    vao.constructIndexBuffer(sizeof(indices), indices, GL_STATIC_DRAW);
+    ebo.bind();
+    ebo.usage(lwvl::Usage::Static);
+    ebo.construct(indices, 6);
+
+    lwvl::VertexArray::clear();
+    lwvl::ArrayBuffer::clear();
+    lwvl::ElementBuffer::clear();
 }
 
-Quad::Quad(Quad&& other) noexcept : vao(std::move(other.vao)) {}
+Quad::Quad(Quad&& other) noexcept : vao(other.vao), vbo(other.vbo), ebo(other.ebo) {}
 
 Quad& Quad::operator=(Quad&& other) noexcept {
-    vao = std::move(other.vao);
+    vao = other.vao;
+    vbo = other.vbo;
+    ebo = other.ebo;
     return *this;
 }
 
-void Quad::draw() const {
-    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT);
+void Quad::draw() {
+    vao.bind();
+    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE);
 }

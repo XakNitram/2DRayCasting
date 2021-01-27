@@ -1,6 +1,5 @@
 #pragma once
-#include "../pch.h"
-#include <glad/glad.h>
+#include "pch.hpp"
 
 namespace lwvl::debug {
     enum class Source {
@@ -34,9 +33,13 @@ namespace lwvl::debug {
         DONT_CARE    = GL_DONT_CARE
     };
 
-    typedef void(__stdcall* LWVLDebugProc)(
-        Source source, Type type, unsigned int id,
-        Severity severity, int length, const char* message,
+#ifdef _WIN32
+    using LWVLDebugProc = void(__stdcall *)(
+#else
+    using LWVLDebugProc = void(*)(
+#endif
+        Source source, Type type, Severity severity,
+        unsigned int id, int length, const char* message,
         const void* userState
     );
 

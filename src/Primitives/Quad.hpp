@@ -1,10 +1,13 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "glad/glad.h"
-#include "Renderer/VertexArray.h"
+#include "Renderer/VertexArray.hpp"
+#include "Renderer/Buffer.hpp"
 
 
 class Quad {
-    VertexArray vao;
+    lwvl::VertexArray vao;
+    lwvl::ArrayBuffer vbo;
+    lwvl::ElementBuffer ebo;
 public:
 
     Quad(float left, float bottom, float width, float height);
@@ -14,5 +17,5 @@ public:
     Quad& operator=(const Quad& other) = delete;
     Quad& operator=(Quad&& other) noexcept;
 
-    void draw() const;
+    void draw();
 };

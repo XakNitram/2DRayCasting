@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Geometrics.h"
+#include "pch.hpp"
+#include "Geometrics.hpp"
 
 // Point
 Point::Point(float x, float y): x(x), y(y) {}

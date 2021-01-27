@@ -1,13 +1,13 @@
 #pragma once
-#include "pch.h"
-#include "Math/Geometrics.h"
-#include "Math/Boundary.h"
+#include "pch.hpp"
+#include "Math/Geometrics.hpp"
+#include "Primitives/Boundary.hpp"
 
 class __declspec(novtable) Caster {
 public:
-	virtual void update(const float x, const float y) = 0;
+	virtual void update(float x, float y) = 0;
 	virtual void look(const std::vector<Boundary>& bounds) = 0;
-	virtual void draw() const = 0;
+	virtual void draw() = 0;
 };
 
 Point closestIntersection(const Ray& ray, std::vector<Point> intersections);

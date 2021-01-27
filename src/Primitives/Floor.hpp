@@ -1,9 +1,12 @@
-#include "pch.h"
+#include "pch.hpp"
 #include "glad/glad.h"
-#include "Renderer/VertexArray.h"
+#include "Renderer/VertexArray.hpp"
+#include "Renderer/Buffer.hpp"
 
 class Floor {
-    VertexArray vao;
+    lwvl::VertexArray vao;
+    lwvl::ArrayBuffer vbo;
+    lwvl::ElementBuffer ebo;
 public:
 
     Floor(float left, float bottom, float width, float height);
@@ -13,5 +16,5 @@ public:
     Floor& operator=(const Floor& other) = delete;
     Floor& operator=(Floor&& other) noexcept;
 
-    void draw() const;
+    void draw();
 };

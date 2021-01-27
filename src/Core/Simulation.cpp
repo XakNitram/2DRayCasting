@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Simulation.h"
+#include "pch.hpp"
+#include "Simulation.hpp"
 
 
 void Simulation::terminate() {

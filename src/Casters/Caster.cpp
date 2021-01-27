@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Caster.h"
+#include "pch.hpp"
+#include "Caster.hpp"
 
 Point closestIntersection(const Ray& ray, std::vector<Point> intersections) {
 	const unsigned int numIntersections = intersections.size();

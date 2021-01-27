@@ -1,149 +1,36 @@
-#include "../pch.h"
-#include "VertexArray.h"
+#include "pch.hpp"
+#include "VertexArray.hpp"
 
-void VertexArray::genIndexBuffer() {
-#ifdef _DEBUG
-	std::cout << "Initializing element buffer on vertex array " << id << " post-initialization." << std::endl;
-#endif // _DEBUG
-
-	glBindVertexArray(id);
-	glGenBuffers(1, &ebo);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+lwvl::VertexArray::VertexArray() {
+    glGenVertexArrays(1, &m_id);
 }
 
-VertexArray::VertexArray(unsigned int stride, bool useElementsBuffer): ebo(0), attributeCount(0), stride(stride) {
-	GLCall(glGenVertexArrays(1, &id));
-	GLCall(glBindVertexArray(id));
-	GLCall(glGenBuffers(1, &vbo));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	
-	if (useElementsBuffer) {
-		GLCall(glGenBuffers(1, &ebo));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
-	}
+lwvl::VertexArray::~VertexArray() {
+    glDeleteVertexArrays(1, &m_id);
 }
 
-VertexArray::VertexArray(VertexArray&& other) noexcept : id(other.id), vbo(other.vbo), ebo(other.ebo), attributeCount(other.attributeCount), stride(other.stride) {
-#ifdef _DEBUG
-	std::cout << "Moving vertex array " << id << '.' << std::endl;
-#endif // _DEBUG
-
-
-	other.id = 0;
-	other.vbo = 0;
-	other.ebo = 0;
+void lwvl::VertexArray::bind() {
+    glBindVertexArray(m_id);
 }
 
-VertexArray::~VertexArray() {
-	if (id) {
-		if (ebo) {
-			GLCall(glDeleteBuffers(1, &ebo));
-		}
-		GLCall(glDeleteBuffers(1, &vbo));
-		GLCall(glDeleteVertexArrays(1, &id));
-
-#ifdef _DEBUG
-		std::cout << "Destroying vertex array " << id << " and associated buffers." << std::endl;
-#endif // DEBUG
-	}
-
-#ifdef _DEBUG
-	else {
-		std::cout << "Vertex array " << id << " lifetime ended with an id of 0." << std::endl;
-	}
-#endif // DEBUG
+void lwvl::VertexArray::clear() {
+    glBindVertexArray(0);
 }
 
-VertexArray& VertexArray::operator=(VertexArray&& other) noexcept {
-#ifdef _DEBUG
-	std::cout << "Moving vertex array " << id << '.' << std::endl;
-#endif // _DEBUG
-	id = other.id;
-	vbo = other.vbo;
-	ebo = other.ebo;
-	attributeCount = other.attributeCount;
-	stride = other.stride;
+uint32_t lwvl::VertexArray::instances() const { return m_instances; }
+void lwvl::VertexArray::instances(uint32_t count) { m_instances = count; }
 
-	other.id = 0;
-	other.vbo = 0;
-	other.ebo = 0;
-
-	return *this;
+void lwvl::VertexArray::attribute(uint8_t dimensions, GLenum type, int64_t stride, int64_t offset, uint32_t divisor) {
+    glEnableVertexAttribArray(m_attributes);
+    glVertexAttribPointer(m_attributes, dimensions, type, GL_FALSE, stride, reinterpret_cast<void*>(offset));
+    glVertexAttribDivisor(m_attributes, divisor);
+    m_attributes++;
 }
 
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-make-member-function-const"
-void VertexArray::constructArrayBuffer(GLsizei size, const void* data, GLenum usage) {
-#ifdef _DEBUG
-	std::cout << "Constructing array buffer of " << size << " bytes on vertex array " << id << '.' << std::endl;
-#endif // DEBUG
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glBufferData(GL_ARRAY_BUFFER, size, data, usage));
+void lwvl::VertexArray::drawArrays(GLenum mode, int count) const {
+    glDrawArraysInstanced(mode, 0, count, m_instances);
 }
 
-void VertexArray::setArrayData(GLintptr offset, GLsizeiptr size, const void* data) {
-//#ifdef _DEBUG
-//	std::cout << "Updating array buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
-//#endif // _DEBUG
-
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glBufferSubData(GL_ARRAY_BUFFER, offset, size, data));
-}
-#pragma clang diagnostic pop
-
-void VertexArray::constructIndexBuffer(GLsizei size, const void* data, GLenum usage) {
-#ifdef _DEBUG
-	std::cout << "Constructing element buffer of " << size << " bytes on vertex array " << id << '.' << std::endl;
-#endif // _DEBUG
-	if (!ebo) {
-		genIndexBuffer();
-	}
-	
-	else {
-		GLCall(glBindVertexArray(id));
-		GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
-	}
-	
-	GLCall(glBufferData(GL_ELEMENT_ARRAY_BUFFER, size, data, usage));
-}
-
-#pragma clang diagnostic push
-#pragma ide diagnostic ignored "readability-make-member-function-const"
-void VertexArray::setIndexData(GLintptr offset, GLsizeiptr size, const void* data) {
-//#ifdef _DEBUG
-//	std::cout << "Updating element buffer with " << size << " bytes of data on vertex array " << id << '.' << std::endl;
-//#endif // _DEBUG
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
-	glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, offset, size, data);
-}
-#pragma clang diagnostic pop
-
-void VertexArray::attachAttribute(GLuint dimensions, GLenum type, unsigned int offset) {
-#ifdef _DEBUG
-	std::cout << "Attaching " << dimensions << "d attribute"
-		<< " on vertex array " << id << '.'
-		<< std::endl;
-#endif // DEBUG
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glEnableVertexAttribArray(attributeCount));
-	GLCall(glVertexAttribPointer(attributeCount, dimensions, type, GL_FALSE, stride, (const void*)offset));
-	attributeCount++;
-}
-
-void VertexArray::drawArrays(GLenum mode, GLuint count) const {
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glDrawArrays(mode, 0, count));
-}
-
-void VertexArray::drawElements(GLenum mode, GLuint count, GLenum type) const {
-	ASSERT(ebo);
-	GLCall(glBindVertexArray(id));
-	GLCall(glBindBuffer(GL_ARRAY_BUFFER, vbo));
-	GLCall(glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo));
-	GLCall(glDrawElements(mode, count, type, nullptr));
+void lwvl::VertexArray::drawElements(GLenum mode, int count, GLenum type) const {
+    glDrawElementsInstanced(mode, count, type, nullptr, m_instances);
 }

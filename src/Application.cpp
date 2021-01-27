@@ -1,16 +1,16 @@
-#include "pch.h"
+#include "pch.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
-#include "Core/Utils.h"
-#include "Core/Simulation.h"
-#include "Renderer/GLDebug.h"
-#include "Renderer/Shader.h"
-#include "Math/Geometrics.h"
-#include "Math/Boundary.h"
-#include "Casters/AngleCaster.h"
-#include "Casters/EndPointCaster.h"
-#include "Primitives/Quad.h"
-#include "Primitives/Floor.h"
+#include "Core/Utils.hpp"
+#include "Core/Simulation.hpp"
+#include "Renderer/GLDebug.hpp"
+#include "Renderer/Shader.hpp"
+#include "Math/Geometrics.hpp"
+#include "Primitives/Boundary.hpp"
+#include "Casters/AngleCaster.hpp"
+#include "Casters/EndPointCaster.hpp"
+#include "Primitives/Quad.hpp"
+#include "Primitives/Floor.hpp"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 

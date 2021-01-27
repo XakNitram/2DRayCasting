@@ -1,7 +1,7 @@
-#include "pch.h"
-#include "Floor.h"
+#include "pch.hpp"
+#include "Floor.hpp"
 
-Floor::Floor(float left, float bottom, float width, float height): vao(4 * sizeof(float)) {
+Floor::Floor(float left, float bottom, float width, float height) {
     float positions[16] = {
         // positions                 | texture coordinates
         left,         bottom,          0.0f, 0.0f,
@@ -10,25 +10,39 @@ Floor::Floor(float left, float bottom, float width, float height): vao(4 * sizeo
         left,         bottom + height, 0.0f, 1.0f
     };
 
-    vao.constructArrayBuffer(sizeof(positions), positions, GL_STATIC_DRAW);
-    vao.attachAttribute(2, GL_FLOAT, 0);
-    vao.attachAttribute(2, GL_FLOAT, 2 * sizeof(float));
+    vao.bind();
 
-    unsigned int indices[6] = {
+    vbo.bind();
+    vbo.usage(lwvl::Usage::Static);
+    vbo.construct(positions, 16);
+
+    vao.attribute(2, GL_FLOAT, 4 * sizeof(float), 0);
+    vao.attribute(2, GL_FLOAT, 4 * sizeof(float), 2 * sizeof(float));
+
+    uint8_t indices[6] = {
         0, 1, 2,
         2, 3, 0
     };
 
-    vao.constructIndexBuffer(sizeof(indices), indices, GL_STATIC_DRAW);
+    ebo.bind();
+    ebo.usage(lwvl::Usage::Static);
+    ebo.construct(indices, 6);
+
+    lwvl::VertexArray::clear();
+    lwvl::ArrayBuffer::clear();
+    lwvl::ElementBuffer::clear();
 }
 
-Floor::Floor(Floor&& other) noexcept : vao(std::move(other.vao)) {}
+Floor::Floor(Floor&& other) noexcept : vao(other.vao), vbo(other.vbo), ebo(other.ebo) {}
 
 Floor& Floor::operator=(Floor&& other) noexcept {
-    vao = std::move(other.vao);
+    vao = other.vao;
+    vbo = other.vbo;
+    ebo = other.ebo;
     return *this;
 }
 
-void Floor::draw() const {
-    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT);
+void Floor::draw() {
+    vao.bind();
+    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE);
 }

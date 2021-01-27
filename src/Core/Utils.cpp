@@ -1,5 +1,5 @@
-#include "pch.h"
-#include "Utils.h"
+#include "pch.hpp"
+#include "Utils.hpp"
 
 std::string readFile(const std::string& filepath) {
 	// need to figure out how to handle errors on this.
