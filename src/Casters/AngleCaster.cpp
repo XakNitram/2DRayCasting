@@ -47,7 +47,7 @@ void LineAngleCaster::update(const float x, const float y) {
 	vbo.update(positions, 2);
 }
 
-void LineAngleCaster::look(const std::vector<Boundary>& bounds) {
+void LineAngleCaster::look(const std::vector<LineSegment>& bounds) {
 	float positions[2 * numRays];
 	const unsigned int numBounds = bounds.size();
 	intersections.reserve(numBounds);
@@ -125,7 +125,7 @@ void FilledAngleCaster::update(const float x, const float y) {
 	vbo.update(positions, 2);
 }
 
-void FilledAngleCaster::look(const std::vector<Boundary>& bounds) {
+void FilledAngleCaster::look(const std::vector<LineSegment>& bounds) {
 	intersections.reserve(bounds.size());
 	const unsigned int bufferSize = (numRays + 1) * 2;
 	float positions[bufferSize];

@@ -20,7 +20,7 @@ public:
 
     void update(float x, float y) final;
 
-    void look(const std::vector<Boundary>& bounds) final;
+    void look(const std::vector<LineSegment>& bounds) final;
 
     void draw() final;
 };
@@ -38,7 +38,7 @@ public:
 
     void update(float x, float y) final;
 
-    void look(const std::vector<Boundary>& bounds) final;
+    void look(const std::vector<LineSegment>& bounds) final;
 
     void draw() final;
 };

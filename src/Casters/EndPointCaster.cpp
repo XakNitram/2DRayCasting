@@ -52,7 +52,7 @@ void LineEndPointCaster::update(const float x, const float y) {
     pos.y = y;
 }
 
-void LineEndPointCaster::look(const std::vector<Boundary>& bounds) {
+void LineEndPointCaster::look(const std::vector<LineSegment>& bounds) {
     // Add rays and lines to match the number of walls.
     const uint32_t neededRays = calculateRays(bounds.size());
 
@@ -83,7 +83,7 @@ void LineEndPointCaster::look(const std::vector<Boundary>& bounds) {
 
     // Point the rays at the wall endpoints.
     for (uint32_t i = 0; i < numBounds; i++) {
-        const LineSegment& line = bounds[i].line;
+        const LineSegment& line = bounds[i];
 
         const float angleA = std::atan2f(line.a.y - pos.y, line.a.x - pos.x);
         const float angleB = std::atan2f(line.b.y - pos.y, line.b.x - pos.x);
@@ -165,7 +165,7 @@ void FilledEndPointCaster::update(const float x, const float y) {
     pos.y = y;
 }
 
-void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
+void FilledEndPointCaster::look(const std::vector<LineSegment>& bounds) {
     // Add rays and lines to match the number of walls.
     const uint32_t neededRays = calculateRays(bounds.size());
 
@@ -189,7 +189,7 @@ void FilledEndPointCaster::look(const std::vector<Boundary>& bounds) {
 
     // Point the rays at the wall endpoints.
     for (uint32_t i = 0; i < numBounds; i++) {
-        const LineSegment& line = bounds[i].line;
+        const LineSegment& line = bounds[i];
 
         const float angleA = std::fmodf(std::atan2f(line.a.y - pos.y, line.a.x - pos.x) + M_TAU, M_TAU);
         const float angleB = std::fmodf(std::atan2f(line.b.y - pos.y, line.b.x - pos.x) + M_TAU, M_TAU);

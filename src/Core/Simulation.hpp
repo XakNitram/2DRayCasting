@@ -1,3 +1,4 @@
+#pragma once
 #include "pch.hpp"
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>

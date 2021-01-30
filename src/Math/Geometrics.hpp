@@ -7,7 +7,7 @@ struct Point {
 	Point(float x, float y);
 	Point();
 
-	float distanceTo(const Point& other) const;
+	[[nodiscard]] float distanceTo(const Point& other) const;
 };
 
 struct Vector {
@@ -17,13 +17,15 @@ struct Vector {
 	Vector(float x, float y);
 	Vector(const Vector& other);
 
-	float angle() const;
+	[[nodiscard]] float angle() const;
 };
 
 struct LineSegment {
 	Point a, b;
 
+	LineSegment() = default;
 	LineSegment(float x1, float y1, float x2, float y2);
+	LineSegment(Point a, Point b);
 };
 
 struct Ray {
@@ -33,5 +35,5 @@ struct Ray {
 	Ray(float x, float y, float angle);
 	Ray();
 
-	std::optional<Point> intersects(const LineSegment& bound) const;
+	[[nodiscard]] std::optional<Point> intersects(const LineSegment& bound) const;
 };

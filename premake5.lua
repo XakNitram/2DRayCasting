@@ -31,11 +31,11 @@ project "2DRayCasting"
 		"{COPY} res/Shaders/ %{cfg.targetdir}/Shaders/"
 	}
 
-	pchheader "rcpch.h"
-	pchsource "src/rcpch.cpp"
+	pchheader "pch.hpp"
+	pchsource "src/pch.cpp"
 
 	files {
-		"src/**.h",
+		"src/**.hpp",
 		"src/**.cpp",
 		"res/Shaders/**.vert",
 		"res/Shaders/**.frag"

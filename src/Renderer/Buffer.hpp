@@ -30,20 +30,23 @@ namespace lwvl {
                 glDeleteBuffers(1, &bufferID);
             }
 
-            explicit operator unsigned int() const {
+            explicit operator uint32_t () const {
                 return bufferID;
             }
 
-            const unsigned int bufferID = reserve();
+            const uint32_t bufferID = reserve();
         };
 
-        // We make this shareable so we can make copies of a Buffer instead of references to it.
-        std::shared_ptr<Buffer::ID> m_id = std::make_shared<Buffer::ID>();
+        // Offsite Data - to avoid copying buffers on the GPU for simple copies of this class.
+        std::shared_ptr<Buffer::ID> m_offsite_id = std::make_shared<Buffer::ID>();
+
+        // Local Data
+        uint32_t m_id = static_cast<uint32_t>(*m_offsite_id);
         Usage m_usage = Usage::Dynamic;
 
     public:
-        unsigned int id() {
-            return static_cast<unsigned int>(*m_id);
+        uint32_t id() {
+            return m_id;
         }
 
         Buffer() = default;
@@ -87,7 +90,7 @@ namespace lwvl {
         void bind() {
             glBindBuffer(
                 static_cast<GLenum>(target),
-                static_cast<unsigned int>(*m_id)
+                m_id
             );
         }
 

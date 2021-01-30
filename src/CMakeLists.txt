@@ -21,19 +21,23 @@ add_executable(
         Math/Geometrics.cpp
 
         # PRIMITIVES
-        Primitives/Boundary.hpp
-        Primitives/Boundary.cpp
         Primitives/Floor.hpp
         Primitives/Floor.cpp
         Primitives/Quad.hpp
         Primitives/Quad.cpp
+        Primitives/FloorTexture.hpp
+        Primitives/FloorTexture.cpp
 
         # RENDERER
         Renderer/Buffer.hpp
+        Renderer/Framebuffer.hpp
+        Renderer/Framebuffer.cpp
         Renderer/GLDebug.hpp
         Renderer/GLDebug.cpp
         Renderer/Shader.hpp
         Renderer/Shader.cpp
+        Renderer/Texture.hpp
+        Renderer/Texture.cpp
         Renderer/VertexArray.hpp
         Renderer/VertexArray.cpp
 )
@@ -42,6 +46,7 @@ add_executable(
 target_include_directories(ray-casting PRIVATE "${CMAKE_CURRENT_SOURCE_DIR}")
 
 # Link in glad and glfw libraries.
+target_link_libraries(ray-casting PRIVATE OpenGL32)
 target_link_libraries(ray-casting PRIVATE glad)
 target_link_libraries(ray-casting PRIVATE glfw)
 
@@ -59,6 +64,8 @@ set_target_properties(
         LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
         RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
 )
+
+#set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" /SUBSYSTEM:WINDOWS /ENTRY:main)
 
 add_custom_target(
         shaders ALL

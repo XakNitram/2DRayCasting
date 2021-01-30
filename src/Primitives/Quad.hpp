@@ -1,5 +1,5 @@
+#pragma once
 #include "pch.hpp"
-#include "glad/glad.h"
 #include "Renderer/VertexArray.hpp"
 #include "Renderer/Buffer.hpp"
 

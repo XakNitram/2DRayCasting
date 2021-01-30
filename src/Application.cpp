@@ -1,21 +1,94 @@
 #include "pch.hpp"
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>
 #include "Core/Utils.hpp"
 #include "Core/Simulation.hpp"
+#include "Math/Geometrics.hpp"
 #include "Renderer/GLDebug.hpp"
 #include "Renderer/Shader.hpp"
-#include "Math/Geometrics.hpp"
 #include "Primitives/Boundary.hpp"
+#include "Primitives/Floor.hpp"
+#include "Primitives/FloorTexture.hpp"
 #include "Casters/AngleCaster.hpp"
 #include "Casters/EndPointCaster.hpp"
-#include "Primitives/Quad.hpp"
-#include "Primitives/Floor.hpp"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
+// MSVCP140D
+// VCRUNTIME140D
+// ucrtbased.dll
 
 constexpr unsigned int FOLLOW_MOUSE = 0b1;
 constexpr unsigned int SHOW_BOUNDS  = 0b10;
+constexpr uint32_t CIRCLE_SLICES = 64;
+constexpr float M_TAU = 6.283185307179586f;
+
+
+// We can remove this template variable in the future
+//  if it makes the class easier to use.
+template<size_t capacity>
+class NodeRenderer {
+    // Attributes
+    lwvl::VertexArray vao;
+    lwvl::ArrayBuffer vbo;
+
+    std::vector<LineSegment> m_segments;
+
+    // Methods
+    std::array<float, capacity * 4> collectData() {
+        std::array<float, capacity * 4> temp {};
+
+        size_t currentElements = size();
+        for (size_t i = 0; i < currentElements; i++) {
+            LineSegment& segment = m_segments[i];
+            temp[i * 4 + 0] = segment.a.x;
+            temp[i * 4 + 1] = segment.a.y;
+            temp[i * 4 + 2] = segment.b.x;
+            temp[i * 4 + 3] = segment.b.y;
+        }
+
+        return temp;
+    }
+
+public:
+    NodeRenderer() {
+        m_segments.reserve(capacity);
+
+        vao.bind();
+        vbo.bind();
+        vbo.usage(lwvl::Usage::Dynamic);
+
+        std::array<float, capacity * 4> data = collectData();
+        vbo.construct(data.begin(), data.end());
+        vao.attribute(2, GL_FLOAT, 2 * sizeof(float), 0);
+
+        lwvl::VertexArray::clear();
+        lwvl::ArrayBuffer::clear();
+    }
+
+    const std::vector<LineSegment>& segments() { return m_segments; }
+
+    size_t size() { return m_segments.size(); }
+    size_t max() { return capacity; }
+
+    void add(LineSegment&& segment) {
+        if (size() != capacity) {
+            m_segments.push_back(segment);
+        } else {
+            throw std::exception("NodeRenderer capacity exceeded.");
+        }
+    }
+
+    // Maybe a remove method but I won't use it here.
+
+    void update() {
+        vbo.bind();
+        std::array<float, capacity * 4> data = collectData();
+        vbo.update(data.begin(), data.end());
+    }
+
+    void draw() {
+        vao.bind();
+        vao.drawArrays(GL_LINES, capacity * 2);
+    }
+};
 
 
 struct CasterConfig {
@@ -49,73 +122,6 @@ struct SimulationConfig {
 };
 
 
-class FloorTexture {
-    uint32_t m_id = 0;
-    uint32_t m_slot = 0;
-
-public:
-    FloorTexture() {
-        glGenTextures(1, &m_id);
-    }
-
-    ~FloorTexture() {
-        glDeleteTextures(1, &m_id);
-    }
-
-    void render(uint32_t width, uint32_t height) {
-        GLuint frame;
-        glGenFramebuffers(1, &frame);
-        glBindFramebuffer(GL_FRAMEBUFFER, frame);
-
-        glBindTexture(GL_TEXTURE_2D, m_id);
-        glTexImage2D(
-                GL_TEXTURE_2D, 0, GL_RGB, width, height,
-                0, GL_RGB, GL_UNSIGNED_BYTE, nullptr
-        );
-
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-        glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-        glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, m_id, 0);
-
-        Quad floor(-1.0f, -1.0f, 2.0f, 2.0f);
-        lwvl::ShaderProgram texturePipeline;
-        lwvl::VertexShader fv("#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }");
-        lwvl::FragmentShader ff(readFile("Shaders/default.frag"));
-//        lwvl::FragmentShader ff(readFile("Shaders/mazing.frag"));
-        texturePipeline.link(fv, ff);
-        texturePipeline.bind();
-
-        // Floor color:
-        texturePipeline.uniform("u_Color").set3f(1.00000f, 1.00000f, 1.00000f);  // White
-//        texturePipeline.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
-
-        // resolution for mazing.frag
-//        texturePipeline.uniform("u_Resolution").set2f(static_cast<float>(width), static_cast<float>(height));
-
-        GLsizei prevViewport[4];
-        glGetIntegerv(GL_VIEWPORT, prevViewport);
-        const GLsizei prevWidth = prevViewport[2];
-        const GLsizei prevHeight = prevViewport[3];
-
-        glViewport(0, 0, width + 1, height + 1);
-        floor.draw();
-
-        glViewport(0, 0, prevWidth, prevHeight);
-        glBindFramebuffer(GL_FRAMEBUFFER, 0);
-        glDeleteFramebuffers(1, &frame);
-    }
-
-    [[nodiscard]] uint32_t slot() const { return m_slot; }
-    void slot(uint32_t slot) { m_slot = slot; }
-
-    void bind() const {
-        glBindTexture(GL_TEXTURE_2D, m_id);
-        glActiveTexture(GL_TEXTURE0 + m_slot);
-    }
-};
-
-
 class RayCasting final : public Simulation {
 	static void __stdcall debug_gl(
         lwvl::debug::Source source, lwvl::debug::Type type, lwvl::debug::Severity severity,
@@ -124,10 +130,11 @@ class RayCasting final : public Simulation {
 		if (type == lwvl::debug::Type::ERROR) {
 			throw std::exception(message);
 		}
-
+#ifndef NDEBUG
 		else {
 			std::cout << "[OpenGL] " << message << std::endl;
 		}
+#endif
 	}
 
 protected:
@@ -164,12 +171,12 @@ protected:
 private:
 	lwvl::debug::GLEventListener m_listener;
 	SimulationConfig settings;
+	NodeRenderer<12 + CIRCLE_SLICES> bounds;
 	lwvl::ShaderProgram lineShader, lightShader, floorShader;
-	std::vector<Boundary> bounds;
+	lwvl::Uniform lightCenter;
 	CasterConfig casters[4];
 	FloorTexture floorTexture;
-	std::unique_ptr<Floor> floor;
-	lwvl::Uniform lightCenter;
+	Floor floor;
 
 	inline std::unique_ptr<Caster>& currentCaster() {
 		return casters[static_cast<size_t>(settings.mode)].caster;
@@ -177,7 +184,8 @@ private:
 
 public:
 	RayCasting(unsigned int width, unsigned int height, GLFWmonitor* monitor = nullptr) :
-		Simulation(width, height, "RayCasting", monitor), m_listener(this, debug_gl, true)
+		Simulation(width, height, "RayCasting", monitor),
+		m_listener(this, debug_gl, true)
 	{
 		attachKeyCallback();
 		swapInterval(1);
@@ -208,8 +216,7 @@ public:
             static_cast<uint32_t>(floorWidth),
             static_cast<uint32_t>(floorHeight)
         );
-
-		floor = std::make_unique<Floor>(wPad, hPad, floorWidth, floorHeight);
+		floor.update(wPad, hPad, floorWidth, floorHeight);
 
 		// ****** Construct Shaders ******
 		lineShader.link(readFile("Shaders/default.vert"), readFile("Shaders/default.frag"));
@@ -225,48 +232,76 @@ public:
 		lightShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
 		lightShader.uniform("u_Resolution").set2f(floorWidth, floorHeight);
 		lightShader.uniform("u_Offset").set2f(wPad, hPad);
-//        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
+		lightShader.uniform("u_Texture").set1i(floorTexture.slot());
+		lightCenter = lightShader.uniform("u_MouseCoords");
+
+		//        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
 //        lightShader.uniform("u_LightColor").set3f(0.30980f, 0.00392f, 0.27843f);  // Tyrian Purple
         lightShader.uniform("u_LightColor").set3f(0.71373f, 0.09020f, 0.29412f);  // Pictoral Carmine
 //        lightShader.uniform("u_LightColor").set3f(0.76471f, 0.92157f, 0.47059f);  // Yellow Green Crayola
-		lightShader.uniform("u_Texture").set1i(floorTexture.slot());
-		lightCenter = lightShader.uniform("u_MouseCoords");
 
 		floorShader.bind();
 		floorShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
 		floorShader.uniform("u_Texture").set1i(floorTexture.slot());
 
 		// ****** Construct Boundaries ******
-		bounds.reserve(14); {
-			bounds.emplace_back(wPad, hPad, frameWidth - wPad, hPad);
-			bounds.emplace_back(frameWidth - wPad, hPad, frameWidth - wPad, frameHeight - hPad);
-			bounds.emplace_back(frameWidth - wPad, frameHeight - hPad, wPad, frameHeight - hPad);
-			bounds.emplace_back(wPad, frameHeight - hPad, wPad, hPad);
+        {
+            // Bounding Wall
+            Point frameWallA {wPad, hPad};
+            Point frameWallB {frameWidth - wPad, hPad};
+            Point frameWallC {frameWidth - wPad, frameHeight - hPad};
+            Point frameWallD {wPad, frameHeight - hPad};
 
-			const float width14 = frameWidth / 4.0f;
+            bounds.add({ frameWallA, frameWallB });
+            bounds.add({ frameWallB, frameWallC });
+            bounds.add({ frameWallC, frameWallD });
+            bounds.add({ frameWallD, frameWallA });
+
+            const float width14 = frameWidth / 4.0f;
 			const float height14 = frameHeight / 4.0f;
 			const float width34 = 3.0f * frameWidth / 4.0f;
 			const float height34 = 3.0f * frameHeight / 4.0f;
 
-			bounds.emplace_back(width14 - wPad, height14 - hPad, width14 + wPad, height14 - hPad);
-			//bounds.emplace_back(width14 + wPad, height14 - hPad, width14 + wPad, height34 + hPad);
-			bounds.emplace_back(width14 + wPad, height34 + hPad, width14 - wPad, height34 + hPad);
-			bounds.emplace_back(width14 - wPad, height34 + hPad, width14 - wPad, height14 - hPad);
+			// West Wall
+			Point westWallA {width14 - wPad, height14 - hPad};
+			Point westWallB {width14 + wPad, height14 - hPad};
+			Point westWallC {width14 + wPad, height34 + hPad};
+			Point westWallD {width14 - wPad, height34 + hPad};
 
-			bounds.emplace_back(width34 - wPad, height14 - hPad, width34 + wPad, height14 - hPad);
-			bounds.emplace_back(width34 + wPad, height14 - hPad, width34 + wPad, height34 + hPad);
-			bounds.emplace_back(width34 + wPad, height34 + hPad, width34 - wPad, height34 + hPad);
-			//bounds.emplace_back(width34 - wPad, height34 + hPad, width34 - wPad, height14 - hPad);
+			bounds.add({ westWallA, westWallB });
+			bounds.add({ westWallB, westWallC });
+			bounds.add({ westWallC, westWallD });
+			bounds.add({ westWallD, westWallA });
 
-			const float wPad5 = 5.0f * wPad;
-			const float hPad5 = 5.0f * hPad;
+			// East Wall
+			Point eastWallA {width34 - wPad, height14 - hPad};
+			Point eastWallB {width34 + wPad, height14 - hPad};
+			Point eastWallC {width34 + wPad, height34 + hPad};
+			Point eastWallD {width34 - wPad, height34 + hPad};
 
-			bounds.emplace_back(width14 + wPad5, height14, frameWidth / 2.0f, frameHeight / 2.0f);
-			bounds.emplace_back(width34 - wPad5, height14, frameWidth / 2.0f, frameHeight / 2.0f);
-			bounds.emplace_back(width14 + wPad5, height34, frameWidth / 2.0f, frameHeight / 2.0f);
-			bounds.emplace_back(width34 - wPad5, height34, frameWidth / 2.0f, frameHeight / 2.0f);
-		}
+			bounds.add({ eastWallA, eastWallB });
+			bounds.add({ eastWallB, eastWallC });
+			bounds.add({ eastWallC, eastWallD });
+			bounds.add({ eastWallD, eastWallA });
 
+			// Center Circle
+			Point center = {frameWidth / 2.0f, frameHeight / 2.0f};
+
+			uint32_t circleSlices = CIRCLE_SLICES;
+			float slice = M_TAU / static_cast<float>(circleSlices);
+//			float radius = frameHeight / 4.0f;
+            float radius = (height34 - height14) / 2.0f;
+
+			Point prevPoint {radius * std::cosf(0.0f) + center.x, radius * std::sinf(0.0f) + center.y};
+            for (uint32_t i = 1; i < circleSlices + 1; i++) {
+                float angle = static_cast<float>(i) * slice;
+                Point newPoint {radius * std::cosf(angle) + center.x, radius * std::sinf(angle) + center.y};
+                bounds.add({ newPoint, prevPoint });
+                prevPoint = newPoint;
+            }
+        }
+
+		bounds.update();
 
 		// ****** Initialize Casters ******
 		const unsigned int numBounds = bounds.size();
@@ -297,7 +332,7 @@ public:
 					lightShader.bind();
 					lightCenter.set2f(mousePosXf, frameHeight - mousePosYf);
 					entity->update(mousePosXf, frameHeight - mousePosYf);
-					entity->look(bounds);
+					entity->look(bounds.segments());
 				}
 			}
 
@@ -316,20 +351,17 @@ public:
 		// Draw caster.
 		floorTexture.bind();
 		floorShader.bind();
-		floor->draw();
+		floor.draw();
 
 		lightShader.bind();
 		entity->draw();
 
 		if (settings.config & SHOW_BOUNDS) {
 			lineShader.bind();
-			for (Boundary& bound : bounds) {
-				bound.draw();
-			}
+			bounds.draw();
 		}
 	}
 };
-
 
 int main() {
 	try {

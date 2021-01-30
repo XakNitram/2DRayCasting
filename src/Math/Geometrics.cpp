@@ -28,6 +28,7 @@ float Vector::angle() const {
 
 // Line
 LineSegment::LineSegment(float x1, float y1, float x2, float y2) : a(x1, y1), b(x2, y2) {}
+LineSegment::LineSegment(Point a, Point b): a(a), b(b) {}
 
 
 // Ray

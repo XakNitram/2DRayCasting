@@ -18,11 +18,11 @@ Point closestIntersection(const Ray& ray, std::vector<Point> intersections) {
 
 
 void pushIntersections(
-	const Ray& ray, const std::vector<Boundary>& bounds, 
+	const Ray& ray, const std::vector<LineSegment>& bounds,
 	std::vector<Point>& intersections
 ) {
-	for (const Boundary& bound : bounds) {
-		if (auto intersection = ray.intersects(bound.line)) {
+	for (const LineSegment& bound : bounds) {
+		if (auto intersection = ray.intersects(bound)) {
 			intersections.push_back(intersection.value());
 		}
 	}

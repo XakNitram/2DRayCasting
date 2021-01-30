@@ -123,11 +123,11 @@ void lwvl::ShaderProgram::link() {
 	*/
 
 	glLinkProgram(m_id);
-	// assert(glGetProgramiv(m_id, GL_LINK_STATUS) == GL_TRUE);  
+	// assert(glGetProgramiv(m_offsite_id, GL_LINK_STATUS) == GL_TRUE);
 	// assertion because the user can't change enough with shader files to break this.
 	
 	glValidateProgram(m_id);
-	// assert(glGetProgramiv(m_id, GL_VALIDATION_STATUS) == GL_TRUE);
+	// assert(glGetProgramiv(m_offsite_id, GL_VALIDATION_STATUS) == GL_TRUE);
 	
 	/* Checks to see whether the executables contained in program can execute given the current OpenGL state.
 	* https://www.khronos.org/registry/OpenGL-Refpages/gl4/html/glValidateProgram.xhtml
