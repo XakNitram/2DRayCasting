@@ -23,10 +23,11 @@ add_executable(
         # PRIMITIVES
         Primitives/Floor.hpp
         Primitives/Floor.cpp
-        Primitives/Quad.hpp
-        Primitives/Quad.cpp
         Primitives/FloorTexture.hpp
         Primitives/FloorTexture.cpp
+        Primitives/NodeRenderer.hpp
+        Primitives/Quad.hpp
+        Primitives/Quad.cpp
 
         # RENDERER
         Renderer/Buffer.hpp
