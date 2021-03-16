@@ -39,14 +39,13 @@ enum class RenderMode: size_t {
 
 
 struct SimulationConfig {
-	RenderMode mode;
-	unsigned int config;
-	float frameWidth, frameHeight;
+	RenderMode mode = RenderMode::FILLED_END_POINT;
+	uint32_t config = FOLLOW_MOUSE | SHOW_BOUNDS;
+	float frameWidth = 0.0f;
+	float frameHeight = 0.0f;
+	bool shouldClose = false;
 
-	SimulationConfig() : 
-		mode(RenderMode::FILLED_END_POINT), config(FOLLOW_MOUSE | SHOW_BOUNDS),
-		frameWidth(0.0f), frameHeight(0.0f)
-	{}
+	SimulationConfig() = default;
 };
 
 
