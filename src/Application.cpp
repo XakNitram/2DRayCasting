@@ -162,9 +162,10 @@ public:
 		lightShader.uniform("u_Texture").set1i(floorTexture.slot());
 		lightCenter = lightShader.uniform("u_MouseCoords");
 
-		//        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
+        lightShader.uniform("u_LightColor").set3f(1.00000f, 0.00000f, 0.00000f);  // Red
+//        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
 //        lightShader.uniform("u_LightColor").set3f(0.30980f, 0.00392f, 0.27843f);  // Tyrian Purple
-        lightShader.uniform("u_LightColor").set3f(0.71373f, 0.09020f, 0.29412f);  // Pictoral Carmine
+//        lightShader.uniform("u_LightColor").set3f(0.71373f, 0.09020f, 0.29412f);  // Pictoral Carmine
 //        lightShader.uniform("u_LightColor").set3f(0.76471f, 0.92157f, 0.47059f);  // Yellow Green Crayola
 
 		floorShader.bind();
