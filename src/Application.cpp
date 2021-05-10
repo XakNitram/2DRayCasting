@@ -146,9 +146,9 @@ public:
 		floor.update(wPad, hPad, floorWidth, floorHeight);
 
 		// ****** Construct Shaders ******
-		lineShader.link(readFile("Shaders/default.vert"), readFile("Shaders/default.frag"));
-		lightShader.link(readFile("Shaders/light.vert"), readFile("Shaders/light.frag"));
-		floorShader.link(readFile("Shaders/floor.vert"), readFile("Shaders/floor.frag"));
+		lineShader.link(readFile("Data/Shaders/default.vert"), readFile("Data/Shaders/default.frag"));
+		lightShader.link(readFile("Data/Shaders/light.vert"), readFile("Data/Shaders/light.frag"));
+		floorShader.link(readFile("Data/Shaders/floor.vert"), readFile("Data/Shaders/floor.frag"));
 
 		// ****** Initialize Shader Uniforms ******
 		lineShader.bind();

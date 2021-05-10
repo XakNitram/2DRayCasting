@@ -1,6 +1,8 @@
 # Add the project files to the executable.
-add_executable(
-        ray-casting Application.cpp
+target_sources(
+    ray-casting
+    PRIVATE
+        Application.cpp
 
         # CASTERS
         Casters/Caster.hpp
@@ -54,56 +56,4 @@ target_link_libraries(ray-casting PRIVATE glfw)
 # Use precompiled headers.
 target_precompile_headers(ray-casting PRIVATE pch.hpp pch.cpp)
 
-# Mark the project as C++ 17 and set the output directory.
-set_target_properties(
-        ray-casting PROPERTIES
-        CXX_STANDARD 17
-        CXX_STANDARD_REQUIRED YES
-        CXX_EXTENSIONS NO
-
-        ARCHIVE_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        LIBRARY_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-        RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}/bin/
-)
-
 #set(CMAKE_EXE_LINKER_FLAGS "${CMAKE_EXE_LINKER_FLAGS}" /SUBSYSTEM:WINDOWS /ENTRY:main)
-
-add_custom_target(
-        shaders ALL
-        DEPENDS
-            ${CMAKE_BINARY_DIR}/bin/Shaders/default.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/default.vert
-            ${CMAKE_BINARY_DIR}/bin/Shaders/floor.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/floor.vert
-            ${CMAKE_BINARY_DIR}/bin/Shaders/light.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/light.vert
-#            ${CMAKE_BINARY_DIR}/bin/Shaders/mazing.frag
-#            ${CMAKE_BINARY_DIR}/bin/Shaders/spacetime.frag
-)
-add_dependencies(ray-casting shaders)
-
-# Copy shaders to output directory.
-add_custom_command(
-        DEPENDS
-            ${CMAKE_SOURCE_DIR}/res/Shaders/default.frag
-            ${CMAKE_SOURCE_DIR}/res/Shaders/default.vert
-            ${CMAKE_SOURCE_DIR}/res/Shaders/floor.frag
-            ${CMAKE_SOURCE_DIR}/res/Shaders/floor.vert
-            ${CMAKE_SOURCE_DIR}/res/Shaders/light.frag
-            ${CMAKE_SOURCE_DIR}/res/Shaders/light.vert
-#            ${CMAKE_SOURCE_DIR}/res/Shaders/mazing.frag
-#            ${CMAKE_SOURCE_DIR}/res/Shaders/spacetime.frag
-        OUTPUT
-            ${CMAKE_BINARY_DIR}/bin/Shaders/default.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/default.vert
-            ${CMAKE_BINARY_DIR}/bin/Shaders/floor.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/floor.vert
-            ${CMAKE_BINARY_DIR}/bin/Shaders/light.frag
-            ${CMAKE_BINARY_DIR}/bin/Shaders/light.vert
-#            ${CMAKE_BINARY_DIR}/bin/Shaders/mazing.frag
-#            ${CMAKE_BINARY_DIR}/bin/Shaders/spacetime.frag
-        COMMENT "Copying shaders to output directory"
-        COMMAND ${CMAKE_COMMAND} -E copy_directory
-        ${CMAKE_SOURCE_DIR}/res/Shaders/
-        ${CMAKE_BINARY_DIR}/bin/Shaders/
-)

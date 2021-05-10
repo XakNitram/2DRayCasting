@@ -15,17 +15,17 @@ void FloorTexture::render(uint32_t width, uint32_t height) {
     Quad floor(-1.0f, -1.0f, 2.0f, 2.0f);
     lwvl::ShaderProgram texturePipeline;
     lwvl::VertexShader fv("#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }");
-    lwvl::FragmentShader ff(readFile("Shaders/default.frag"));
-//        lwvl::FragmentShader ff(readFile("Shaders/mazing.frag"));
+    lwvl::FragmentShader ff(readFile("Data/Shaders/default.frag"));
+//    lwvl::FragmentShader ff(readFile("Shaders/mazing.frag"));
     texturePipeline.link(fv, ff);
     texturePipeline.bind();
 
     // Floor color:
     texturePipeline.uniform("u_Color").set3f(1.00000f, 1.00000f, 1.00000f);  // White
-//        texturePipeline.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
+//    texturePipeline.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
 
     // resolution for mazing.frag
-//        texturePipeline.uniform("u_Resolution").set2f(static_cast<float>(width), static_cast<float>(height));
+//    texturePipeline.uniform("u_Resolution").set2f(static_cast<float>(width), static_cast<float>(height));
 
     GLsizei prevViewport[4];
     glGetIntegerv(GL_VIEWPORT, prevViewport);
