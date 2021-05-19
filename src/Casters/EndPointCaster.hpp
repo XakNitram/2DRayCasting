@@ -2,7 +2,6 @@
 #include "pch.hpp"
 #include "Caster.hpp"
 #include "Math/Geometrics.hpp"
-#include "Primitives/Boundary.hpp"
 #include "Renderer/VertexArray.hpp"
 #include "Renderer/Buffer.hpp"
 

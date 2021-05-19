@@ -4,7 +4,6 @@
 #include "Math/Geometrics.hpp"
 #include "Renderer/GLDebug.hpp"
 #include "Renderer/Shader.hpp"
-#include "Primitives/Boundary.hpp"
 #include "Primitives/Floor.hpp"
 #include "Primitives/FloorTexture.hpp"
 #include "Primitives/NodeRenderer.hpp"

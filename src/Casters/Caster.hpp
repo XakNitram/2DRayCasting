@@ -1,7 +1,6 @@
 #pragma once
 #include "pch.hpp"
 #include "Math/Geometrics.hpp"
-#include "Primitives/Boundary.hpp"
 
 class __declspec(novtable) Caster {
 public:
