@@ -2,8 +2,8 @@
 #include "pch.hpp"
 #include "Caster.hpp"
 #include "Math/Geometrics.hpp"
-#include "Renderer/VertexArray.hpp"
-#include "Renderer/Buffer.hpp"
+#include "VertexArray.hpp"
+#include "Buffer.hpp"
 
 
 class LineEndPointCaster : public Caster {

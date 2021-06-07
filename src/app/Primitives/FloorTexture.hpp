@@ -1,8 +1,8 @@
 #pragma once
 #include "pch.hpp"
-#include "Renderer/Framebuffer.hpp"
-#include "Renderer/Texture.hpp"
-#include "Renderer/Shader.hpp"
+#include "Framebuffer.hpp"
+#include "Texture.hpp"
+#include "Shader.hpp"
 #include "Core/Utils.hpp"
 #include "Quad.hpp"
 

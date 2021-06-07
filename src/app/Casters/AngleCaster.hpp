@@ -2,8 +2,8 @@
 #include "pch.hpp"
 #include "Caster.hpp"
 #include "Math/Geometrics.hpp"
-#include "Renderer/VertexArray.hpp"
-#include "Renderer/Buffer.hpp"
+#include "VertexArray.hpp"
+#include "Buffer.hpp"
 
 // TODO: Find some way to populate an array of angle slices.
 constexpr unsigned int numRays = 64;

@@ -1,7 +1,7 @@
 #pragma once
 #include "pch.hpp"
-#include "Renderer/VertexArray.hpp"
-#include "Renderer/Buffer.hpp"
+#include "VertexArray.hpp"
+#include "Buffer.hpp"
 #include "Math/Geometrics.hpp"
 
 
