@@ -7,7 +7,7 @@
 #include "Primitives/NodeRenderer.hpp"
 #include "Casters/AngleCaster.hpp"
 #include "Casters/EndPointCaster.hpp"
-#include "GLDebug.hpp"
+#include "Debug.hpp"
 #include "Shader.hpp"
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156

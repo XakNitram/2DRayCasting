@@ -6,7 +6,10 @@ namespace lwvl {
     namespace details {
         enum class BufferTarget {
             Array = GL_ARRAY_BUFFER,
-            Element = GL_ELEMENT_ARRAY_BUFFER
+            Element = GL_ELEMENT_ARRAY_BUFFER,
+            Texture = GL_TEXTURE_BUFFER,
+            Uniform = GL_UNIFORM_BUFFER,
+            ShaderStorage = GL_SHADER_STORAGE_BUFFER,
         };
     }
 
@@ -15,7 +18,6 @@ namespace lwvl {
         Dynamic = GL_DYNAMIC_DRAW,
         Stream = GL_STREAM_DRAW
     };
-
 
     template<details::BufferTarget target>
     class Buffer {
@@ -51,6 +53,8 @@ namespace lwvl {
         }
 
         Buffer() = default;
+
+        explicit Buffer(Usage usage) : m_usage(usage) {}
 
         Buffer(const Buffer &other) = default;
 
@@ -107,4 +111,7 @@ namespace lwvl {
 
     typedef Buffer<details::BufferTarget::Array> ArrayBuffer;
     typedef Buffer<details::BufferTarget::Element> ElementBuffer;
+    typedef Buffer<details::BufferTarget::Texture> TextureBuffer;
+    typedef Buffer<details::BufferTarget::Uniform> UniformBuffer;
+    typedef Buffer<details::BufferTarget::ShaderStorage> ShaderStorageBuffer;
 }

@@ -85,7 +85,7 @@ void LineAngleCaster::look(const std::vector<LineSegment> &bounds) {
 
 void LineAngleCaster::draw() {
     vao.bind();
-    vao.drawElements(GL_LINES, 2 * numRays, GL_UNSIGNED_INT);
+    vao.drawElements(lwvl::PrimitiveMode::Lines, 2 * numRays, lwvl::ByteFormat::UnsignedInt);
 }
 
 
@@ -161,5 +161,5 @@ void FilledAngleCaster::look(const std::vector<LineSegment> &bounds) {
 
 void FilledAngleCaster::draw() {
     vao.bind();
-    vao.drawArrays(GL_TRIANGLE_FAN, numRays + 2);
+    vao.drawArrays(lwvl::PrimitiveMode::TriangleFan, numRays + 2);
 }

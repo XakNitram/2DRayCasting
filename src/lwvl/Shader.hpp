@@ -55,12 +55,6 @@ namespace lwvl {
     };
 
 
-    class shader_compilation_failure : public std::exception {
-    public:
-        explicit shader_compilation_failure(const std::string &msg);
-    };
-
-
     enum class ShaderType {
         Vertex = GL_VERTEX_SHADER,
         TessCtrl = GL_TESS_CONTROL_SHADER,
@@ -126,6 +120,19 @@ namespace lwvl {
             return *this;
         }
 
+        static std::string readFile(const std::string &filepath) {
+            // need to figure out how to handle errors on this.
+            std::ifstream file(filepath);
+            std::stringstream output_stream;
+
+            std::string line;
+            while (getline(file, line)) {
+                output_stream << line << '\n';
+            }
+
+            return output_stream.str();
+        }
+
         ~Shader() {
             // An id of 0 will be silently ignored.
             glDeleteShader(m_id);
@@ -158,24 +165,41 @@ namespace lwvl {
     *   myShader.link(VertexShader, FragmentShader);
     */
     class ShaderProgram {
-        unsigned int m_id{reserve()};
+        class ID {
+            static unsigned int reserve() {
+                return glCreateProgram();
+            }
+
+        public:
+            ~ID() {
+                glDeleteProgram(programID);
+            }
+
+            constexpr explicit operator uint32_t() const {
+                return programID;
+            }
+
+            const uint32_t programID = reserve();
+        };
+
+        // Offsite Data -
+        std::shared_ptr<ShaderProgram::ID> m_offsite_id = std::make_shared<ShaderProgram::ID>();
+
+        // Local Data
+        uint32_t m_id = static_cast<uint32_t>(*m_offsite_id);
 
         [[nodiscard]] int uniformLocation(const std::string &name) const;
 
-        static unsigned int reserve();
-
     public:
-        ShaderProgram();
+        ShaderProgram() = default;
 
-        ShaderProgram(const ShaderProgram &other) = delete;
+        ShaderProgram(const ShaderProgram &other) = default;
 
-        ShaderProgram(ShaderProgram &&other) noexcept;
+        ShaderProgram &operator=(const ShaderProgram &other) = default;
 
-        ~ShaderProgram();
+        ShaderProgram(ShaderProgram &&other) noexcept = default;
 
-        ShaderProgram &operator=(const ShaderProgram &other) = delete;
-
-        ShaderProgram &operator=(ShaderProgram &&other) noexcept;
+        ShaderProgram &operator=(ShaderProgram &&other) noexcept = default;
 
         [[nodiscard]] unsigned int id() const;
 

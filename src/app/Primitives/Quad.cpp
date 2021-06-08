@@ -40,5 +40,5 @@ Quad &Quad::operator=(Quad &&other) noexcept {
 
 void Quad::draw() {
     vao.bind();
-    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE);
+    vao.drawElements(lwvl::PrimitiveMode::Triangles, 6, lwvl::ByteFormat::UnsignedByte);
 }

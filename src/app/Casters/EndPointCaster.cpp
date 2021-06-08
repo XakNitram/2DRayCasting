@@ -126,7 +126,7 @@ void LineEndPointCaster::look(const std::vector<LineSegment> &bounds) {
 
 void LineEndPointCaster::draw() {
     vao.bind();
-    vao.drawElements(GL_LINES, static_cast<int32_t>(2 * currentRays), GL_UNSIGNED_INT);
+    vao.drawElements(lwvl::PrimitiveMode::Lines, static_cast<int32_t>(2 * currentRays), lwvl::ByteFormat::UnsignedInt);
 }
 
 
@@ -238,5 +238,5 @@ void FilledEndPointCaster::look(const std::vector<LineSegment> &bounds) {
 
 void FilledEndPointCaster::draw() {
     vao.bind();
-    vao.drawArrays(GL_TRIANGLE_FAN, int32_t(currentRays + 2));
+    vao.drawArrays(lwvl::PrimitiveMode::TriangleFan, int32_t(currentRays + 2));
 }

@@ -1,5 +1,5 @@
 #include "pch.hpp"
-#include "GLDebug.hpp"
+#include "Debug.hpp"
 
 void lwvl::debug::simpleDebugCallback(GLDEBUGPROC callback, void *userPtr) {
     glDebugMessageCallback(callback, userPtr);

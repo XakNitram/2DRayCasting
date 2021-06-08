@@ -77,7 +77,7 @@ Floor &Floor::operator=(Floor &&other) noexcept {
 
 void Floor::draw() {
     vao.bind();
-    vao.drawElements(GL_TRIANGLES, 6, GL_UNSIGNED_BYTE);
+    vao.drawElements(lwvl::PrimitiveMode::Triangles, 6, lwvl::ByteFormat::UnsignedByte);
 }
 
 void Floor::update(float left, float bottom, float width, float height) {

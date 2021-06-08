@@ -72,6 +72,6 @@ public:
 
     void draw() {
         vao.bind();
-        vao.drawArrays(GL_LINES, capacity * 2);
+        vao.drawArrays(lwvl::PrimitiveMode::Lines, capacity * 2);
     }
 };

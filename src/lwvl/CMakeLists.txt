@@ -2,10 +2,12 @@ add_library(
     lwvl
 
     Buffer.hpp
+    Common.hpp
+    Common.cpp
     Framebuffer.hpp
     Framebuffer.cpp
-    GLDebug.hpp
-    GLDebug.cpp
+    Debug.hpp
+    Debug.cpp
     Shader.hpp
     Shader.cpp
     Texture.hpp
@@ -14,12 +16,8 @@ add_library(
     VertexArray.cpp
 )
 
-set_target_properties(
-    lwvl PROPERTIES
-    CXX_STANDARD 17
-    CXX_STANDARD_REQUIRED YES
-    CXX_EXTENSIONS NO
-)
+target_compile_features(lwvl PUBLIC cxx_std_17)
+set_target_properties(lwvl PROPERTIES CXX_EXTENSIONS OFF)
 
 target_include_directories(lwvl PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}")
 

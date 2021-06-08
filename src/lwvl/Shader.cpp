@@ -65,12 +65,15 @@ void lwvl::Uniform::setOrthographic(float top, float bottom, float right, float 
 }
 
 void lwvl::Uniform::set2DOrthographic(float top, float bottom, float right, float left) {
+    float rlStein = 1.0f / (right - left);
+    float tbStein = 1.0f / (top - bottom);
+
     float ortho[16] = {
         // top 3 rows
-        2.0f / (right - left), 0.0f, 0.0f, 0.0f,
-        0.0f, 2.0f / (top - bottom), 0.0f, 0.0f,
+        2.0f * rlStein, 0.0f, 0.0f, 0.0f,
+        0.0f, 2.0f * tbStein, 0.0f, 0.0f,
         0.0f, 0.0f, 1.0f, 0.0f,
-        -(right + left) / (right - left), -(top + bottom) / (top - bottom), 0.0f, 1.0f
+        -(right + left) * rlStein, -(top + bottom) * tbStein, 0.0f, 1.0f
     };
 
     glUniformMatrix4fv(m_location, 1, GL_FALSE, ortho);
@@ -79,10 +82,6 @@ void lwvl::Uniform::set2DOrthographic(float top, float bottom, float right, floa
 int lwvl::Uniform::location() const {
     return m_location;
 }
-
-
-/* ****** Shader Compilation Error ****** */
-lwvl::shader_compilation_failure::shader_compilation_failure(const std::string &msg) : std::exception(msg.c_str()) {}
 
 
 /* ****** Shader ****** */
@@ -95,28 +94,6 @@ int lwvl::ShaderProgram::uniformLocation(const std::string &name) const {
     } else {
         return location;
     }
-}
-
-unsigned int lwvl::ShaderProgram::reserve() {
-    unsigned int id = glCreateProgram();
-    return id;
-}
-
-lwvl::ShaderProgram::ShaderProgram() = default;
-
-lwvl::ShaderProgram::ShaderProgram(ShaderProgram &&other) noexcept {
-    other.m_id = 0;
-}
-
-lwvl::ShaderProgram::~ShaderProgram() {
-    // An id of 0 will be silently ignored.
-    glDeleteProgram(m_id);
-}
-
-lwvl::ShaderProgram &lwvl::ShaderProgram::operator=(ShaderProgram &&other) noexcept {
-    m_id = other.m_id;
-    other.m_id = 0;
-    return *this;
 }
 
 unsigned int lwvl::ShaderProgram::id() const {
