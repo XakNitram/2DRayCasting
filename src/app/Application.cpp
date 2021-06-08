@@ -150,7 +150,7 @@ public:
         lightShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
         lightShader.uniform("u_Resolution").set2f(floorWidth, floorHeight);
         lightShader.uniform("u_Offset").set2f(wPad, hPad);
-        lightShader.uniform("u_Texture").set1i(floorTexture.slot());
+        lightShader.uniform("u_Texture").set1i(int32_t(floorTexture.slot()));
         lightCenter = lightShader.uniform("u_MouseCoords");
 
         lightShader.uniform("u_LightColor").set3f(1.00000f, 0.00000f, 0.00000f);  // Red
@@ -161,7 +161,7 @@ public:
 
         floorShader.bind();
         floorShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
-        floorShader.uniform("u_Texture").set1i(floorTexture.slot());
+        floorShader.uniform("u_Texture").set1i(int32_t(floorTexture.slot()));
 
         // ****** Construct Boundaries ******
         {

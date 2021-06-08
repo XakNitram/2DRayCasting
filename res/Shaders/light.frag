@@ -21,7 +21,7 @@ void main() {
 
 	float spaceCorrectionFactor = 100.0;
 	float d = spaceCorrectionFactor * length(correctedMouseCoord - correctedFragCoord);
-	float attenuation = 1.0/(1.0 + 0.045 * d + 0.0075 * d * d);
+	float attenuation = 1.0 / (1.0 + 0.045 * d + 0.0075 * d * d);
 
 	float ambientStrength = 0.00625;
 	vec3 ambient = ambientStrength * ambientColor;
@@ -32,5 +32,8 @@ void main() {
 
 	vec3 phongLight = (ambient + attenuation * diffuse) * floorColor;
 
-	final = vec4(pow(phongLight, gamma), 1.0);
+    // Reinhard tone mapping
+    vec3 ldr = phongLight / (phongLight + vec3(1.0));
+
+	final = vec4(pow(ldr, gamma), 1.0);
 }

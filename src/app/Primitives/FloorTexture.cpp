@@ -5,47 +5,47 @@
 void FloorTexture::render(uint32_t width, uint32_t height) {
     lwvl::Framebuffer frame;
 
-    texture.bind();
-    texture.construct(width, height, nullptr);
-    texture.filter(lwvl::Filter::Linear);
+    bind();
+    construct(
+        width, height, nullptr,
+        lwvl::ChannelLayout::RGBA16F,
+        lwvl::ChannelOrder::RGBA,
+        lwvl::ByteFormat::HalfFloat
+    );
+    filter(lwvl::Filter::Linear);
 
     frame.bind();
-    frame.attach(lwvl::Attachment::Color, texture);
+    frame.attach(lwvl::Attachment::Color, *this);
 
     Quad floor(-1.0f, -1.0f, 2.0f, 2.0f);
-    lwvl::ShaderProgram texturePipeline;
+    lwvl::ShaderProgram textureControl;
     lwvl::VertexShader fv(
         "#version 330 core\nlayout(location=0) in vec4 position;\nvoid main() { gl_Position = position; }"
     );
-    lwvl::FragmentShader ff(readFile("Data/Shaders/default.frag"));
+    lwvl::FragmentShader ff(lwvl::FragmentShader::readFile("Data/Shaders/default.frag"));
     //    lwvl::FragmentShader ff(readFile("Shaders/mazing.frag"));
-    texturePipeline.link(fv, ff);
-    texturePipeline.bind();
+    textureControl.link(fv, ff);
+    textureControl.bind();
 
     // Floor color:
-    texturePipeline.uniform("u_Color").set3f(1.00000f, 1.00000f, 1.00000f);  // White
-    //    texturePipeline.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
+    textureControl.uniform("u_Color").set3f(1.00000f, 1.00000f, 1.00000f);  // White
+    //textureControl.uniform("u_Color").set3f(0.61569f, 0.63529f, 0.67059f);  // Silver
 
     // resolution for mazing.frag
-    //    texturePipeline.uniform("u_Resolution").set2f(static_cast<float>(width), static_cast<float>(height));
+    //    textureControl.uniform("u_Resolution").set2f(static_cast<float>(width), static_cast<float>(height));
 
+    // Viewport is not bound to the framebuffer so we have to restore the previous viewport.
     GLsizei prevViewport[4];
     glGetIntegerv(GL_VIEWPORT, prevViewport);
-    const GLsizei prevWidth = prevViewport[2];
-    const GLsizei prevHeight = prevViewport[3];
+    const auto[prevX, prevY, prevWidth, prevHeight] = prevViewport;
 
     // Translate the viewport and draw the floor to the texture.
-    glViewport(0, 0, width + 1, height + 1);
+    glViewport(0, 0, GLsizei(width + 1), GLsizei(height + 1));
+    lwvl::clear();
     floor.draw();
 
     // Undo the viewport translation.
-    glViewport(0, 0, prevWidth, prevHeight);
-}
-
-uint32_t FloorTexture::slot() { return texture.slot(); }
-
-void FloorTexture::slot(uint32_t value) { texture.slot(value); }
-
-void FloorTexture::bind() {
-    texture.bind();
+    glViewport(prevX, prevY, prevWidth, prevHeight);
+    lwvl::Framebuffer::clear();
+    lwvl::ShaderProgram::clear();
 }

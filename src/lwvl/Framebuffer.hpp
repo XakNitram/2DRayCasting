@@ -10,7 +10,7 @@ namespace lwvl {
         Stencil = GL_STENCIL_ATTACHMENT
     };
 
-    class Texture;
+    class Texture2D;
 
     class Framebuffer {
         uint32_t m_id = 0;
@@ -20,8 +20,10 @@ namespace lwvl {
 
         ~Framebuffer();
 
-        void attach(Attachment, Texture);
+        void attach(Attachment attachment, Texture2D &texture);
 
         void bind();
+
+        static void clear();
     };
 }

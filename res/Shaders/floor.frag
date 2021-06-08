@@ -22,5 +22,9 @@ void main() {
 
 	float ambientStrength = 0.00625;
 	vec3 ambient = ambientStrength * ambientColor;
-	final = vec4(pow(ambient * floorColor.rgb, gamma), 1.0);
+    vec3 color = ambient * floorColor.rgb;
+
+    // Reinhard tone mapping.
+    vec3 ldr = color / (color + vec3(1.0));
+	final = vec4(pow(ldr, gamma), 1.0);
 }
