@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.hpp"
 
 
@@ -12,17 +13,21 @@ namespace lwvl {
     public:
 
         VertexArray();
+
         ~VertexArray();
 
         void bind();
+
         static void clear();
 
         [[nodiscard]] uint32_t instances() const;
+
         void instances(uint32_t count);
 
         void attribute(uint8_t dimensions, GLenum type, int64_t stride, int64_t offset, uint32_t divisor = 0);
 
         void drawArrays(GLenum mode, int count) const;
+
         void drawElements(GLenum mode, int count, GLenum type) const;
     };
 }

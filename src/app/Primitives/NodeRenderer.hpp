@@ -1,8 +1,9 @@
 #pragma once
+
 #include "pch.hpp"
+#include "Math/Geometrics.hpp"
 #include "VertexArray.hpp"
 #include "Buffer.hpp"
-#include "Math/Geometrics.hpp"
 
 
 // We can remove this template variable in the future
@@ -17,11 +18,11 @@ class NodeRenderer {
 
     // Methods
     std::array<float, capacity * 4> collectData() {
-        std::array<float, capacity * 4> temp {};
+        std::array<float, capacity * 4> temp{};
 
         size_t currentElements = size();
         for (size_t i = 0; i < currentElements; i++) {
-            LineSegment& segment = m_segments[i];
+            LineSegment &segment = m_segments[i];
             temp[i * 4 + 0] = segment.a.x;
             temp[i * 4 + 1] = segment.a.y;
             temp[i * 4 + 2] = segment.b.x;
@@ -47,12 +48,13 @@ public:
         lwvl::ArrayBuffer::clear();
     }
 
-    const std::vector<LineSegment>& segments() { return m_segments; }
+    const std::vector<LineSegment> &segments() { return m_segments; }
 
     size_t size() { return m_segments.size(); }
+
     size_t max() { return capacity; }
 
-    void add(LineSegment&& segment) {
+    void add(LineSegment &&segment) {
         if (size() != capacity) {
             m_segments.push_back(segment);
         } else {

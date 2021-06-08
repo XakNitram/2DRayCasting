@@ -1,7 +1,8 @@
 #pragma once
+
 #include "pch.hpp"
-#include "VertexArray.hpp"
 #include "Buffer.hpp"
+#include "VertexArray.hpp"
 
 
 class Quad {
@@ -11,11 +12,14 @@ class Quad {
 public:
 
     Quad(float left, float bottom, float width, float height);
-    Quad(const Quad& other) = delete;
-    Quad(Quad&& other) noexcept;
 
-    Quad& operator=(const Quad& other) = delete;
-    Quad& operator=(Quad&& other) noexcept;
+    Quad(const Quad &other) = delete;
+
+    Quad(Quad &&other) noexcept;
+
+    Quad &operator=(const Quad &other) = delete;
+
+    Quad &operator=(Quad &&other) noexcept;
 
     void draw();
 };

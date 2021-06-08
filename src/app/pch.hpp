@@ -1,5 +1,8 @@
 #pragma once
 
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
+
 #include <cassert>
 #include <cmath>
 #include <memory>
@@ -14,6 +17,3 @@
 #include <unordered_map>
 #include <iostream>
 #include <optional>
-
-#include <glad/glad.h>
-#include <GLFW/glfw3.h>

@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.hpp"
 #include "Texture.hpp"
 
@@ -16,6 +17,7 @@ namespace lwvl {
 
     public:
         Framebuffer();
+
         ~Framebuffer();
 
         void attach(Attachment, Texture);

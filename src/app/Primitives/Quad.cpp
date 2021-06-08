@@ -2,11 +2,11 @@
 #include "Quad.hpp"
 
 Quad::Quad(float left, float bottom, float width, float height) {
-    float positions[8] {
-        left,         bottom,
+    float positions[8]{
+        left, bottom,
         left + width, bottom,
         left + width, bottom + height,
-        left,         bottom + height
+        left, bottom + height
     };
 
     vao.bind();
@@ -15,7 +15,7 @@ Quad::Quad(float left, float bottom, float width, float height) {
     vbo.construct(positions, 8);
     vao.attribute(2, GL_FLOAT, 2 * sizeof(float), 0);
 
-    uint8_t indices[6] {
+    uint8_t indices[6]{
         0, 1, 2,
         2, 3, 0
     };
@@ -29,9 +29,9 @@ Quad::Quad(float left, float bottom, float width, float height) {
     lwvl::ElementBuffer::clear();
 }
 
-Quad::Quad(Quad&& other) noexcept : vao(other.vao), vbo(other.vbo), ebo(other.ebo) {}
+Quad::Quad(Quad &&other) noexcept: vao(other.vao), vbo(other.vbo), ebo(other.ebo) {}
 
-Quad& Quad::operator=(Quad&& other) noexcept {
+Quad &Quad::operator=(Quad &&other) noexcept {
     vao = other.vao;
     vbo = other.vbo;
     ebo = other.ebo;

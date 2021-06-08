@@ -18,11 +18,12 @@ void lwvl::VertexArray::clear() {
 }
 
 uint32_t lwvl::VertexArray::instances() const { return m_instances; }
+
 void lwvl::VertexArray::instances(uint32_t count) { m_instances = count; }
 
 void lwvl::VertexArray::attribute(uint8_t dimensions, GLenum type, int64_t stride, int64_t offset, uint32_t divisor) {
     glEnableVertexAttribArray(m_attributes);
-    glVertexAttribPointer(m_attributes, dimensions, type, GL_FALSE, stride, reinterpret_cast<void*>(offset));
+    glVertexAttribPointer(m_attributes, dimensions, type, GL_FALSE, stride, reinterpret_cast<void *>(offset));
     glVertexAttribDivisor(m_attributes, divisor);
     m_attributes++;
 }

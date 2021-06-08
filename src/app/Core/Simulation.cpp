@@ -19,44 +19,52 @@ void Simulation::terminate() {
     glfwTerminate();
 }
 
-Simulation* Simulation::getState(GLFWwindow* window) {
-    return static_cast<Simulation*>(glfwGetWindowUserPointer(window));
+Simulation *Simulation::getState(GLFWwindow *window) {
+    return static_cast<Simulation *>(glfwGetWindowUserPointer(window));
 }
 
 void Simulation::attachKeyCallback() {
-    glfwSetKeyCallback(window, [](GLFWwindow* window, int key, int scancode, int action, int mods) {
-        Simulation* state = getState(window);
-        if (state) {
-            state->handleKeys(key, scancode, action, mods);
+    glfwSetKeyCallback(
+        window, [](GLFWwindow *window, int key, int scancode, int action, int mods) {
+            Simulation *state = getState(window);
+            if (state) {
+                state->handleKeys(key, scancode, action, mods);
+            }
         }
-    });
+    );
 }
 
 void Simulation::attachCursorPositionCallback() {
-    glfwSetCursorPosCallback(window, [](GLFWwindow* window, double xpos, double ypos) {
-        Simulation* state = getState(window);
-        if (state) {
-            state->handleCursorPosition(xpos, ypos);
+    glfwSetCursorPosCallback(
+        window, [](GLFWwindow *window, double xpos, double ypos) {
+            Simulation *state = getState(window);
+            if (state) {
+                state->handleCursorPosition(xpos, ypos);
+            }
         }
-    });
+    );
 }
 
 void Simulation::attachCursorEnterCallback() {
-    glfwSetCursorEnterCallback(window, [](GLFWwindow* window, int entered) {
-        Simulation* state = getState(window);
-        if (state) {
-            state->handleCursorEnter(entered);
+    glfwSetCursorEnterCallback(
+        window, [](GLFWwindow *window, int entered) {
+            Simulation *state = getState(window);
+            if (state) {
+                state->handleCursorEnter(entered);
+            }
         }
-    });
+    );
 }
 
 void Simulation::attachMouseButtonCallback() {
-    glfwSetMouseButtonCallback(window, [](GLFWwindow* window, int button, int action, int mods) {
-        Simulation* state = getState(window);
-        if (state) {
-            state->handleMouseButton(button, action, mods);
+    glfwSetMouseButtonCallback(
+        window, [](GLFWwindow *window, int button, int action, int mods) {
+            Simulation *state = getState(window);
+            if (state) {
+                state->handleMouseButton(button, action, mods);
+            }
         }
-    });
+    );
 }
 
 void Simulation::handleKeys(int key, int scancode, int action, int mods) {}
@@ -89,7 +97,7 @@ void Simulation::initGLFW() {
     }
 }
 
-Simulation::Simulation(unsigned int width, unsigned int height, const char* title, GLFWmonitor* monitor) {
+Simulation::Simulation(unsigned int width, unsigned int height, const char *title, GLFWmonitor *monitor) {
     // Destructor is not called if exception is thrown 
 
     // Set GLFW window hints.
@@ -111,7 +119,7 @@ Simulation::Simulation(unsigned int width, unsigned int height, const char* titl
         throw std::exception("Failed to create GLFW window.");
     }
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGLLoader((GLADloadproc) glfwGetProcAddress)) {
         terminate();
         throw std::exception("Failed to initialize Glad.");
     }

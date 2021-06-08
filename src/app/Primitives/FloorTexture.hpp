@@ -1,10 +1,11 @@
 #pragma once
+
 #include "pch.hpp"
+#include "Core/Utils.hpp"
+#include "Quad.hpp"
 #include "Framebuffer.hpp"
 #include "Texture.hpp"
 #include "Shader.hpp"
-#include "Core/Utils.hpp"
-#include "Quad.hpp"
 
 
 class FloorTexture {
@@ -14,6 +15,7 @@ public:
     void render(uint32_t width, uint32_t height);
 
     [[nodiscard]] uint32_t slot();
+
     void slot(uint32_t);
 
     void bind();

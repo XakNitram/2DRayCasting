@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.hpp"
 
 namespace lwvl {
@@ -30,7 +31,7 @@ namespace lwvl {
                 glDeleteBuffers(1, &bufferID);
             }
 
-            explicit operator uint32_t () const {
+            explicit operator uint32_t() const {
                 return bufferID;
             }
 
@@ -51,16 +52,18 @@ namespace lwvl {
 
         Buffer() = default;
 
-        Buffer(const Buffer& other) = default;
-        Buffer& operator=(const Buffer& other) = default;
+        Buffer(const Buffer &other) = default;
 
-        Buffer(Buffer&& other) noexcept = default;
-        Buffer& operator=(Buffer&& other) noexcept = default;
+        Buffer &operator=(const Buffer &other) = default;
+
+        Buffer(Buffer &&other) noexcept = default;
+
+        Buffer &operator=(Buffer &&other) noexcept = default;
 
         template<typename T>
-        void construct(const T* data, GLsizei count) {
+        void construct(const T *data, GLsizei count) {
             glBufferData(
-                static_cast<GLenum>(target), sizeof(T) * count, 
+                static_cast<GLenum>(target), sizeof(T) * count,
                 data, static_cast<GLenum>(m_usage)
             );
         }
@@ -74,16 +77,18 @@ namespace lwvl {
         }
 
         template<typename T>
-        void update(const T* data, GLsizei count, GLsizei offsetCount = 0) {
+        void update(const T *data, GLsizei count, GLsizei offsetCount = 0) {
             glBufferSubData(static_cast<GLenum>(target), offsetCount * sizeof(T), count * sizeof(T), data);
         }
 
         template<class Iterator>
         void update(Iterator first, Iterator last, GLsizei offsetCount = 0) {
-            glBufferSubData(static_cast<GLenum>(target), offsetCount * sizeof(*first), sizeof(*first) * (last - first), &(*first));
+            glBufferSubData(
+                static_cast<GLenum>(target), offsetCount * sizeof(*first), sizeof(*first) * (last - first), &(*first));
         }
 
         void usage(Usage usage) { m_usage = usage; }
+
         Usage usage() { return m_usage; }
 
         // These operations should not be const because they modify GL state.

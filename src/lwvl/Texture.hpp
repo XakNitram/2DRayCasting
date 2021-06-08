@@ -1,4 +1,5 @@
 #pragma once
+
 #include "pch.hpp"
 #include "Framebuffer.hpp"
 
@@ -25,7 +26,7 @@ namespace lwvl {
                 glDeleteTextures(1, &textureID);
             }
 
-            explicit operator uint32_t () const {
+            explicit operator uint32_t() const {
                 return textureID;
             }
 
@@ -42,9 +43,11 @@ namespace lwvl {
         friend Framebuffer;
     public:
         [[nodiscard]] uint32_t slot() const;
+
         void slot(uint32_t);
 
-        void construct(uint32_t width, uint32_t height, const void* data);
+        void construct(uint32_t width, uint32_t height, const void *data);
+
         void filter(Filter);
 
         void bind();
