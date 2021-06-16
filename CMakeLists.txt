@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.17)
-project(RayCasting VERSION 1.3.1)
+project(RayCasting VERSION 2.2.0)
 
 # Define the target here so other top-level targets can attach to it.
 add_executable(ray-casting "")
