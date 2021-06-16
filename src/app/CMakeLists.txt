@@ -2,34 +2,34 @@
 target_sources(
     ray-casting
     PRIVATE
-    Application.cpp
+        Application.cpp
 
         # CASTERS
-    Casters/Caster.hpp
-    Casters/Caster.cpp
-    Casters/AngleCaster.hpp
-    Casters/AngleCaster.cpp
-    Casters/EndPointCaster.hpp
-    Casters/EndPointCaster.cpp
+        Casters/Caster.hpp
+        Casters/Caster.cpp
+        Casters/AngleCaster.hpp
+        Casters/AngleCaster.cpp
+        Casters/EndPointCaster.hpp
+        Casters/EndPointCaster.cpp
 
         # CORE
-    Core/Utils.hpp
-    Core/Utils.cpp
-    Core/Simulation.hpp
-    Core/Simulation.cpp
+        Core/Window.hpp
+        Core/Window.cpp
+        Core/Event.hpp
+        Core/Event.cpp
 
         # MATH
-    Math/Geometrics.hpp
-    Math/Geometrics.cpp
+        Math/Geometrics.hpp
+        Math/Geometrics.cpp
 
         # PRIMITIVES
-    Primitives/Floor.hpp
-    Primitives/Floor.cpp
-    Primitives/FloorTexture.hpp
-    Primitives/FloorTexture.cpp
-    Primitives/NodeRenderer.hpp
-    Primitives/Quad.hpp
-    Primitives/Quad.cpp
+        Primitives/Floor.hpp
+        Primitives/Floor.cpp
+        Primitives/FloorTexture.hpp
+        Primitives/FloorTexture.cpp
+        Primitives/NodeRenderer.hpp
+        Primitives/Quad.hpp
+        Primitives/Quad.cpp
 )
 
 # Set src/ as an include directory so files in subdirectories can find each other.

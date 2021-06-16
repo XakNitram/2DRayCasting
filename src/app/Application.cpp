@@ -1,6 +1,6 @@
 #include "pch.hpp"
-#include "Core/Utils.hpp"
-#include "Core/Simulation.hpp"
+#include "Core/Event.hpp"
+#include "Core/Window.hpp"
 #include "Math/Geometrics.hpp"
 #include "Primitives/Floor.hpp"
 #include "Primitives/FloorTexture.hpp"
@@ -12,8 +12,8 @@
 
 // Code Signing: https://stackoverflow.com/questions/16673086/how-to-correctly-sign-an-executable/48244156
 
-constexpr unsigned int FOLLOW_MOUSE = 0b1;
-constexpr unsigned int SHOW_BOUNDS = 0b10;
+using namespace lwvl::debug;
+
 constexpr uint32_t CIRCLE_SLICES = 32;
 constexpr float M_TAU = 6.283185307179586f;
 
@@ -30,140 +30,108 @@ struct CasterConfig {
 };
 
 
-enum class RenderMode : size_t {
-    LINE_ANGLE,
-    FILLED_ANGLE,
-    LINE_END_POINT,
-    FILLED_END_POINT
-};
+static inline double delta(std::chrono::time_point<std::chrono::steady_clock> start) {
+    return 0.000001 * static_cast<double>(
+        std::chrono::duration_cast<std::chrono::microseconds>(
+            std::chrono::high_resolution_clock::now() - start
+        ).count()
+    );
+}
 
 
-struct SimulationConfig {
-    RenderMode mode = RenderMode::FILLED_END_POINT;
-    uint32_t config = FOLLOW_MOUSE | SHOW_BOUNDS;
-    float frameWidth = 0.0f;
-    float frameHeight = 0.0f;
-    bool shouldClose = false;
-
-    SimulationConfig() = default;
-};
+typedef enum {
+    LineAngle = 0,
+    FilledAngle = 1,
+    LineEndpoint = 2,
+    FilledEndpoint = 3
+} RenderMode;
 
 
-class RayCasting final : public Simulation {
-    static void __stdcall debug_gl(
-        lwvl::debug::Source source, lwvl::debug::Type type, lwvl::debug::Severity severity,
-        unsigned int id, int length, const char *message, const void *userState
-    ) {
-        if (type == lwvl::debug::Type::ERROR) {
-            throw std::exception(message);
-        }
-#ifndef NDEBUG
-        else {
-            std::cout << "[OpenGL] " << message << std::endl;
-        }
-#endif
-    }
-
-protected:
-    void handleKeys(int key, int scancode, int action, int mods) final {
-        if (action == GLFW_RELEASE) {
-            switch (key) {
-                case GLFW_KEY_ESCAPE: glfwSetWindowShouldClose(window, true);
-                    return;
-                case GLFW_KEY_1: settings.mode = RenderMode::FILLED_END_POINT;
-                    return;
-                case GLFW_KEY_2: settings.mode = RenderMode::LINE_END_POINT;
-                    return;
-                case GLFW_KEY_3: settings.mode = RenderMode::FILLED_ANGLE;
-                    return;
-                case GLFW_KEY_4: settings.mode = RenderMode::LINE_ANGLE;
-                    return;
-                case GLFW_KEY_B: settings.config ^= SHOW_BOUNDS;
-                    return;
-                case GLFW_KEY_SPACE: settings.config ^= FOLLOW_MOUSE;
-                    return;
-                default: return;
-            }
-        }
-    }
-
-private:
-    lwvl::debug::GLEventListener m_listener;
-    SimulationConfig settings;
-    NodeRenderer<12 + CIRCLE_SLICES> bounds;
-    lwvl::ShaderProgram lineShader, lightShader, floorShader;
-    lwvl::Uniform lightCenter;
-    CasterConfig casters[4];
-    FloorTexture floorTexture;
-    Floor floor;
-
-    inline std::unique_ptr<Caster> &currentCaster() {
-        return casters[static_cast<size_t>(settings.mode)].caster;
-    }
+class Application {
+    Window window;
 
 public:
-    RayCasting(unsigned int width, unsigned int height, GLFWmonitor *monitor = nullptr) :
-        Simulation(width, height, "RayCasting", monitor),
-        m_listener(this, debug_gl, true) {
-        attachKeyCallback();
-        swapInterval(1);
+    Application(uint32_t width, uint32_t height) : window({width, height}, "RayCasting") {}
 
-        //glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_HIDDEN);
+    int run() {
+#ifndef NDEBUG
+        GLEventListener listener(
+            [](
+                Source source, Type type,
+                Severity severity, unsigned int id, int length,
+                const char *message, const void *userState
+            ) {
+                std::cout << "[OpenGL] " << message << std::endl;
+            }
+        );
 
-        // ****** Set Up OpenGL Stuff ******
-        glEnable(GL_BLEND);
-        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
-
-        // ****** Get Actual Frame Size ******
-        int iFrameWidth, iFrameHeight;
-        glfwGetFramebufferSize(window, &iFrameWidth, &iFrameHeight);
-
-        const auto frameWidth = static_cast<float>(iFrameWidth);
-        const auto frameHeight = static_cast<float>(iFrameHeight);
-        settings.frameWidth = frameWidth;
-        settings.frameHeight = frameHeight;
+        const auto setupStart = std::chrono::high_resolution_clock::now();
+#endif
+        float frameWidth, frameHeight;
+        {
+            const auto[width, height] = window.frame();
+            frameWidth = static_cast<float>(width);
+            frameHeight = static_cast<float>(height);
+        }
 
         const float wPad = (10.0f * frameWidth) / 800.0f;
         const float hPad = (10.0f * frameHeight) / 600.0f;
 
-
         float floorWidth = frameWidth - (2.0f * wPad);
         float floorHeight = frameHeight - (2.0f * hPad);
 
-        floorTexture.render(
-            static_cast<uint32_t>(floorWidth),
-            static_cast<uint32_t>(floorHeight)
-        );
-        floor.update(wPad, hPad, floorWidth, floorHeight);
+        Floor floor(wPad, hPad, floorWidth, floorHeight);
+        FloorTexture floorBuffer;
+        floorBuffer.render(static_cast<uint32_t>(floorWidth), static_cast<uint32_t>(floorHeight));
 
         // ****** Construct Shaders ******
-        lineShader.link(readFile("Data/Shaders/default.vert"), readFile("Data/Shaders/default.frag"));
-        lightShader.link(readFile("Data/Shaders/light.vert"), readFile("Data/Shaders/light.frag"));
-        floorShader.link(readFile("Data/Shaders/floor.vert"), readFile("Data/Shaders/floor.frag"));
+        //std::array<float, 16> projection {
+        //    2.0f / frameWidth, 0.0f, 0.0f, 0.0f,
+        //    0.0f, 2.0f / frameHeight, 0.0f, 0.0f,
+        //    0.0f, 0.0f, 1.0f, 0.0f,
+        //    -1.0f, -1.0f, 0.0f, 1.0f
+        //};
 
-        // ****** Initialize Shader Uniforms ******
-        lineShader.bind();
-        lineShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
-        lineShader.uniform("u_Color").set3f(1.0f, 1.0f, 1.0f);
+        // **** Line Render Control ****
+        lwvl::ShaderProgram lineControl;
+        lineControl.link(
+            lwvl::VertexShader::readFile("Data/Shaders/default.vert"),
+            lwvl::FragmentShader::readFile("Data/Shaders/default.frag")
+        );
+        lineControl.bind();
+        lineControl.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
+        lineControl.uniform("u_Color").set3f(1.0f, 1.0f, 1.0f);
 
-        lightShader.bind();
-        lightShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
-        lightShader.uniform("u_Resolution").set2f(floorWidth, floorHeight);
-        lightShader.uniform("u_Offset").set2f(wPad, hPad);
-        lightShader.uniform("u_Texture").set1i(int32_t(floorTexture.slot()));
-        lightCenter = lightShader.uniform("u_MouseCoords");
+        // **** Ray-Caster Render Control ****
+        lwvl::ShaderProgram lightControl;
+        lightControl.link(
+            lwvl::VertexShader::readFile("Data/Shaders/light.vert"),
+            lwvl::FragmentShader::readFile("Data/Shaders/light.frag")
+        );
+        lightControl.bind();
+        lightControl.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
+        lightControl.uniform("u_Resolution").set2f(floorWidth, floorHeight);
+        lightControl.uniform("u_Offset").set2f(wPad, hPad);
+        lightControl.uniform("u_Texture").set1i(int32_t(floorBuffer.slot()));
+        lwvl::Uniform lightCenter = lightControl.uniform("u_MouseCoords");
 
-        lightShader.uniform("u_LightColor").set3f(1.00000f, 0.00000f, 0.00000f);  // Red
-        //        lightShader.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
-        //        lightShader.uniform("u_LightColor").set3f(0.30980f, 0.00392f, 0.27843f);  // Tyrian Purple
-        //        lightShader.uniform("u_LightColor").set3f(0.71373f, 0.09020f, 0.29412f);  // Pictoral Carmine
-        //        lightShader.uniform("u_LightColor").set3f(0.76471f, 0.92157f, 0.47059f);  // Yellow Green Crayola
+        lightControl.uniform("u_LightColor").set3f(1.00000f, 0.00000f, 0.00000f);  // Red
+        //lightControl.uniform("u_LightColor").set3f(0.05098f, 0.19608f, 0.30196f);  // Prussian Blue
+        // lightControl.uniform("u_LightColor").set3f(0.30980f, 0.00392f, 0.27843f);  // Tyrian Purple
+        // lightControl.uniform("u_LightColor").set3f(0.71373f, 0.09020f, 0.29412f);  // Pictoral Carmine
+        // lightControl.uniform("u_LightColor").set3f(0.76471f, 0.92157f, 0.47059f);  // Yellow Green Crayola
 
-        floorShader.bind();
-        floorShader.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
-        floorShader.uniform("u_Texture").set1i(int32_t(floorTexture.slot()));
+        // **** Background Render Control ****
+        lwvl::ShaderProgram floorControl;
+        floorControl.link(
+            lwvl::VertexShader::readFile("Data/Shaders/floor.vert"),
+            lwvl::FragmentShader::readFile("Data/Shaders/floor.frag")
+        );
+        floorControl.bind();
+        floorControl.uniform("u_Projection").set2DOrthographic(frameHeight, 0.0f, frameWidth, 0.0f);
+        floorControl.uniform("u_Texture").set1i(int32_t(floorBuffer.slot()));
 
-        // ****** Construct Boundaries ******
+        NodeRenderer<12 + CIRCLE_SLICES> bounds;
         {
             // Bounding Wall
             Point frameWallA{wPad, hPad};
@@ -219,70 +187,109 @@ public:
                 prevPoint = newPoint;
             }
         }
-
         bounds.update();
 
-        // ****** Initialize Casters ******
         const unsigned int numBounds = bounds.size();
-        casters[static_cast<size_t>(RenderMode::FILLED_END_POINT)].setCaster(
-            std::make_unique<FilledEndPointCaster>(numBounds));
-        casters[static_cast<size_t>(RenderMode::LINE_END_POINT)].setCaster(
-            std::make_unique<LineEndPointCaster>(numBounds));
-        casters[static_cast<size_t>(RenderMode::FILLED_ANGLE)].setCaster(std::make_unique<FilledAngleCaster>());
-        casters[static_cast<size_t>(RenderMode::LINE_ANGLE)].setCaster(std::make_unique<LineAngleCaster>());
-    }
+        CasterConfig casters[4]{};
+        casters[FilledEndpoint].setCaster(std::make_unique<FilledEndPointCaster>(numBounds));
+        casters[LineEndpoint].setCaster(std::make_unique<LineEndPointCaster>(numBounds));
+        casters[FilledAngle].setCaster(std::make_unique<FilledAngleCaster>());
+        casters[LineAngle].setCaster(std::make_unique<LineAngleCaster>());
 
-    void update(double dt) final {
-        const float frameWidth = settings.frameWidth;
-        const float frameHeight = settings.frameHeight;
-        const float wPad = (10.0f * frameWidth) / 400.0f;
-        const float hPad = (10.0f * frameHeight) / 400.0f;
+#ifndef NDEBUG
+        std::cout << "Setup took " << delta(setupStart) << " seconds." << std::endl;
+#endif
 
-        const auto renderMode = static_cast<size_t>(settings.mode);
-        CasterConfig &mode = casters[renderMode];
-        auto &entity = mode.caster;
+        RenderMode renderMode = FilledEndpoint;
+        bool followMouse = true;
+        bool showBounds = true;
 
-        if (settings.config & FOLLOW_MOUSE) {
-            double mousePosX, mousePosY;
-            glfwGetCursorPos(window, &mousePosX, &mousePosY);
-            const auto mousePosXf = static_cast<float>(mousePosX);
-            const auto mousePosYf = static_cast<float>(mousePosY);
+        const auto changeRenderMode = [&](RenderMode newMode) {
+            renderMode = newMode;
+            lightControl.bind();
+            lightCenter.set2f(casters[newMode].prevX, frameHeight - casters[newMode].prevY);
+        };
 
-            if (!(mousePosXf == mode.prevX && mousePosYf == mode.prevY)) {
-                if (!(mousePosXf < wPad || mousePosXf > frameWidth - wPad || mousePosYf < hPad || mousePosYf > frameHeight - hPad)) {
-                    lightShader.bind();
-                    lightCenter.set2f(mousePosXf, frameHeight - mousePosYf);
-                    entity->update(mousePosXf, frameHeight - mousePosYf);
-                    entity->look(bounds.segments());
+        glEnable(GL_BLEND);
+        glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+        while (!window.shouldClose()) {
+            // Fill event stack
+            Window::update();
+
+            // Handle incoming events
+            while (std::optional<Event> possible = window.pollEvent()) {
+                if (!possible.has_value()) {
+                    continue;
+                }
+
+                Event &concrete = possible.value();
+                if (concrete.type == Event::Type::KeyRelease) {
+                    KeyboardEvent &keyboardEvent = std::get<KeyboardEvent>(concrete.event);
+                    switch (keyboardEvent.key) {
+                        case GLFW_KEY_ESCAPE:window.shouldClose(true);
+                            break;
+                        case GLFW_KEY_1:changeRenderMode(FilledEndpoint);
+                            break;
+                        case GLFW_KEY_2:changeRenderMode(LineEndpoint);
+                            break;
+                        case GLFW_KEY_3:changeRenderMode(FilledAngle);
+                            break;
+                        case GLFW_KEY_4:changeRenderMode(LineAngle);
+                            break;
+                        case GLFW_KEY_B:showBounds ^= true;
+                            break;
+                        case GLFW_KEY_SPACE:followMouse ^= true;
+                            break;
+                        default:break;
+                    }
                 }
             }
 
-            mode.prevX = mousePosXf;
-            mode.prevY = mousePosYf;
+            // Update engine
+            CasterConfig &config = casters[renderMode];
+            auto &caster = config.caster;
+
+            if (followMouse) {
+                const auto[mouseXd, mouseYd] = window.cursorPosition();
+                const auto mouseX = static_cast<float>(mouseXd);
+                const auto mouseY = static_cast<float>(mouseYd);
+
+                if (
+                    !(mouseX == config.prevX && mouseY == config.prevY)
+                    && !(mouseX < wPad || mouseX > frameWidth - wPad || mouseY < hPad || mouseY > frameHeight - hPad)
+                    ) {
+                    lightControl.bind();
+                    lightCenter.set2f(mouseX, frameHeight - mouseY);
+                    caster->update(mouseX, frameHeight - mouseY);
+                    caster->look(bounds.segments());
+                }
+
+                config.prevX = mouseX;
+                config.prevY = mouseY;
+            }
+
+            // Rendering
+            lwvl::clear();
+
+            floorBuffer.bind();
+            floorControl.bind();
+            floor.draw();
+
+            lightControl.bind();
+            caster->draw();
+
+            if (showBounds) {
+                lineControl.bind();
+                bounds.draw();
+            }
+
+            window.swapBuffers();
         }
-    }
 
-    void draw() final {
-        auto &entity = currentCaster();
-
-        /****** Update shaders and render. ******/
-        // Clear the screen.
-        glClear(GL_COLOR_BUFFER_BIT);
-
-        // Draw caster.
-        floorTexture.bind();
-        floorShader.bind();
-        floor.draw();
-
-        lightShader.bind();
-        entity->draw();
-
-        if (settings.config & SHOW_BOUNDS) {
-            lineShader.bind();
-            bounds.draw();
-        }
+        return 0;
     }
 };
+
 
 int main() {
     try {
@@ -297,10 +304,11 @@ int main() {
         glfwWindowHint(GLFW_REFRESH_RATE, mode->refreshRate);
 
         RayCasting sim(mode->width, mode->height, monitor);*/
-        RayCasting sim(800, 600);
-        sim.run();
+        //RayCasting sim(800, 600);
+        //sim.run();
 
-        return 0;
+        Application app(800, 600);
+        return app.run();
     }
 
     catch (const std::exception &e) {

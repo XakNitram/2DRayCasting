@@ -4,6 +4,7 @@
 #include <GLFW/glfw3.h>
 
 #include <cassert>
+#include <chrono>
 #include <cmath>
 #include <memory>
 #include <algorithm>

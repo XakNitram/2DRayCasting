@@ -1,7 +1,6 @@
 #pragma once
 
 #include "pch.hpp"
-#include "Core/Utils.hpp"
 #include "Quad.hpp"
 #include "Framebuffer.hpp"
 #include "Texture.hpp"
