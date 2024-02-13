@@ -5,4 +5,5 @@ Other rendering modes are available using the ```1```, ```2```, ```3```, and ```
 The rendering of the boundaries can be toggled using the ```B``` key.
 The ```Space``` key toggles whether the casters follow the mouse.
 
-Based on Daniel Shiffman's [P5.js Ray Casting 2D](https://thecodingtrain.com/CodingChallenges/145-2d-ray-casting.html)
+Based on Daniel Shiffman's [P5.js Ray Casting 2D](https://thecodingtrain.com/challenges/145-ray-casting-2d)
+
